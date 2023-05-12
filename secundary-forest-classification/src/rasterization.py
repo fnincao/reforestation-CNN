@@ -9,8 +9,9 @@ import warnings
 path_shapefile = '/maps/fnb25/data/polygons/LERF/Batatais_2012.shp'
 out_directory = '/maps/fnb25'
 
-def rasterize_polygon(path_shp: str, pixel_res: int, 
-                      out_dir: str, burn_value= 1):
+
+def rasterize_polygon(path_shp: str, pixel_res: int,
+                      out_dir: str, burn_value=1):
     """
     Function to rasterize polygons to start the pre-processing for ingesting
     in the CNN. The polygon shapefile MUST be in a projected coordinate system.
@@ -19,16 +20,17 @@ def rasterize_polygon(path_shp: str, pixel_res: int,
     """
     shp = gpd.read_file(path_shp)
 
-    #Check the proj, everything must be in metric scale
+    # Check the proj, everything must be in metric scale
     if shp.crs.is_geographic:
         warnings.warn("This shapefile is not in metrics scale, \
                       please reproject it to continue")
         raise Exception()
-    
+
     shp_bounds = shp.total_bounds
     num_cols = int((shp_bounds[2] - shp_bounds[0]) / pixel_res)
     num_rows = int((shp_bounds[3] - shp_bounds[1]) / pixel_res)
-    transform = Affine(pixel_res, 0, shp_bounds[0], 0, -pixel_res, shp_bounds[3])
+    transform = Affine(pixel_res, 0, shp_bounds[0],
+                       0, -pixel_res, shp_bounds[3])
     raster_name = out_directory + '/' + path_shp.split('/')[-1][:-4] + '.tif'
     raster = rio.open(
         raster_name,
