@@ -3,7 +3,7 @@
 import geopandas as gpd
 
 
-PATH_SUZANO = '/maps/fnb25/data/polygons_original'
+PATH_SUZANO = '/maps/fnb25/data/polygons_original/Suzano'
 PATH_ATLANTIC = '/maps/fnb25/data/suport_files/Atlantica'
 OUT_PATH = '/maps/fnb25/data/polygons_filtered/Suzano'
 
