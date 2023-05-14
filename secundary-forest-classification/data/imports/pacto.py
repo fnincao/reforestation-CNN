@@ -6,7 +6,6 @@ import pandas as pd
 
 PATH_PACTO = '/maps/fnb25/data/polygons_original/Pacto'
 PATH_ATLANTIC = '/maps/fnb25/data/suport_files/Atlantica'
-OUT_PATH = '/maps/fnb25/data/polygons_filtered/Pacto'
 
 # import atlantic rainforest limits
 atlantic = gpd.read_file(PATH_ATLANTIC)
@@ -34,7 +33,8 @@ pacto = pacto[pacto.within(atlantic.geometry.iloc[0])]
 # Take only the year from the implementation project
 pacto['ano'] = pd.to_datetime(pacto['data_criac']).dt.year
 
-# final dataset
+# Select only columns of interest
 pacto_final = pacto.loc[:, ['ano', 'geometry']].reset_index(drop=True)
 
-pacto_final.to_file(OUT_PATH + '/pacto.shp')
+# Save final dataset
+pacto_final.to_file('/maps/fnb25/data/polygons_filtered/pacto.gpkg', fid=False)
