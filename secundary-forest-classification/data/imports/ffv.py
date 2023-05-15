@@ -1,4 +1,4 @@
-'''Module to import and filter the dataset provided from Click Pacto'''
+'''Module to import and filter the dataset provided from FFV'''
 import glob
 import geopandas as gpd
 import fiona
