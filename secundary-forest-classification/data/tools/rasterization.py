@@ -6,7 +6,7 @@ from rasterio.transform import Affine
 import geopandas as gpd
 import warnings
 
-path_shapefile = '/maps/fnb25/data/polygons/LERF/Batatais_2012.shp'
+path_shapefile = '/maps/fnb25/data/polygons_filtered/polygons.gpkg'
 out_directory = '/maps/fnb25'
 
 
