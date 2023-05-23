@@ -6,19 +6,16 @@ from rasterio.transform import Affine
 import geopandas as gpd
 import warnings
 
-path_shapefile = '/maps/fnb25/data/polygons_filtered/polygons.gpkg'
-out_directory = '/maps/fnb25'
 
-
-def rasterize_polygon(path_shp: str, pixel_res: int,
+def rasterize_polygon(path_file: str, pixel_res: int,
                       out_dir: str, burn_value=1):
     """
     Function to rasterize polygons to start the pre-processing for ingesting
-    in the CNN. The polygon shapefile MUST be in a projected coordinate system.
+    in the CNN. The polygon format MUST be in a projected coordinate system.
     Pixel resolution must be provided in meters. Burn value is the number that
     will be assign to the pixels inside the polygons, default = 1.
     """
-    shp = gpd.read_file(path_shp)
+    shp = gpd.read_file(path_file)
 
     # Check the proj, everything must be in metric scale
     if shp.crs.is_geographic:
@@ -31,7 +28,7 @@ def rasterize_polygon(path_shp: str, pixel_res: int,
     num_rows = int((shp_bounds[3] - shp_bounds[1]) / pixel_res)
     transform = Affine(pixel_res, 0, shp_bounds[0],
                        0, -pixel_res, shp_bounds[3])
-    raster_name = out_directory + '/' + path_shp.split('/')[-1][:-4] + '.tif'
+    raster_name = out_dir + '/' + path_file.split('/')[-1][:-4] + '.tif'
     raster = rio.open(
         raster_name,
         'w',
