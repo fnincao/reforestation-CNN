@@ -30,6 +30,19 @@ def viz_planet(path: str):
         plt.title(path.split('/')[-1][:-4])
 
 
+def viz_reference(path: str):
+    '''
+    Helper to vizualize planet imagery download from GEE
+    '''
+    with rasterio.open(path) as reference:
+
+        # Read the raster data
+        reference_data = reference.read(1).astype(np.uint8)
+
+        plt.imshow(reference_data, vmin=0, vmax=1, cmap='gray')
+        plt.title(path.split('/')[-1][:-4])
+
+
 def viz_s1(path: str):
     '''
     Helper to vizualize Sentinel-1 imagery download from GEE

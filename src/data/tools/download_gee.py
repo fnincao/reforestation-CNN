@@ -32,7 +32,6 @@ def getResult(index, point, image, res, dir, size, sulfix):
     filename = f"{folder}/{prefix}{basename}{sulfix}.{ext}"
     with open(filename, 'wb') as out_file:
         shutil.copyfileobj(r.raw, out_file)
-    print("Done: ", basename)
 
 
 def GetImageChips(download_image: ee.Image,
