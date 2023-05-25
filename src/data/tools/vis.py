@@ -48,7 +48,7 @@ def viz_planet(tile_number: int):
         red_planet = planet.read(2).astype(np.uint16)
         green_planet = planet.read(3).astype(np.uint16)
 
-        res_nir = rescale_intensity(nir_planet, in_range=(0, 4000),
+        res_nir = rescale_intensity(nir_planet, in_range=(0, 5500),
                                     out_range=(0, 255)).astype(np.uint8)
         res_red = rescale_intensity(red_planet, in_range=(0, 4000),
                                     out_range=(0, 255)).astype(np.uint8)
@@ -157,7 +157,7 @@ def viz_all(tile_number: int):
         res_s1 = rescale_intensity(s1, in_range=(-30, -1),
                                    out_range=(0, 255)).astype(np.uint8)
 
-        res_nir = rescale_intensity(nir_planet, in_range=(0, 4000),
+        res_nir = rescale_intensity(nir_planet, in_range=(0, 5500),
                                     out_range=(0, 255)).astype(np.uint8)
         res_red = rescale_intensity(red_planet, in_range=(0, 4000),
                                     out_range=(0, 255)).astype(np.uint8)
