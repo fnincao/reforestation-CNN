@@ -4,7 +4,7 @@ from dataset import PlanetDataset
 from torch.utils.data import DataLoader
 
 
-def save_checkpoint(state, filename='my_checkpoiny.pth.tar'):
+def save_checkpoint(state, filename='my_checkpoint.pth.tar'):
     print('=> Saving checkpoint')
     torch.save(state, filename)
 
@@ -85,7 +85,7 @@ def check_accuracy(loader, model, device='cuda'):
 def save_predictions_as_imgs(
         loader,
         model,
-        folder='/maps/fnb25/ml_data/saved_images',
+        folder='../../../ml_data/saved_images',
         device='cuda',):
 
     model.eval()
@@ -97,7 +97,7 @@ def save_predictions_as_imgs(
         torchvision.utils.save_image(
             preds, f'{folder}/pred_{idx}.png'
         )
-        torchvision.utils.save_image(y.unsqueeze(1).to(torch.uint8),
+        torchvision.utils.save_image(y.unsqueeze(1),
                                      f'{folder}/gt_{idx}.png')
 
         model.train()

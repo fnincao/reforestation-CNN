@@ -21,10 +21,10 @@ IMAGE_HEIGHT = 400
 IMAGE_WIDTH = 400
 PIN_MEMORY = True
 LOAD_MODEL = True
-TRAIN_IMG_DIR = '/maps/fnb25/ml_data/train_images'
-TRAIN_MASK_DIR = '/maps/fnb25/ml_data/train_masks'
-VAL_IMG_DIR = '/maps/fnb25/ml_data/val_images'
-VAL_MASK_DIR = '/maps/fnb25/ml_data/val_masks'
+TRAIN_IMG_DIR = '../../../ml_data/train_images'
+TRAIN_MASK_DIR = '../../../ml_data/train_masks'
+VAL_IMG_DIR = '../../../ml_data/val_images'
+VAL_MASK_DIR = '../../../ml_data/val_masks'
 
 
 # One epoch of training

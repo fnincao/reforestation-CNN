@@ -28,7 +28,7 @@ class PlanetDataset(Dataset):
             ds_green = ds.read(3)
             image = np.stack([ds_nir, ds_red, ds_green], axis=-1)
         with rasterio.open(mask_path) as ds:
-            mask = ds.read(1)
+            mask = ds.read(1).astype(float)
 
         if self.transform is not None:
             augmentations = self.transform(image=image, mask=mask)
