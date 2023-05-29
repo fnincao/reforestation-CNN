@@ -26,7 +26,7 @@ class PlanetDataset(Dataset):
             ds_nir = ds.read(1)
             ds_red = ds.read(2)
             ds_green = ds.read(3)
-            image = np.stack([ds_nir, ds_red, ds_green], axis=-1)
+            image = (np.stack([ds_nir, ds_red, ds_green], axis=-1)) / 10000
         with rasterio.open(mask_path) as ds:
             mask = ds.read(1).astype(float)
 
