@@ -14,8 +14,8 @@ from utils import (load_checkpoint, # noqa
 # Hyperparameters
 LEARNING_RATE = 1e-4
 DEVICE = 'cuda' if torch.cuda.is_available() else 'cpu'
-BATCH_SIZE = 2
-NUM_EPOCHS = 3
+BATCH_SIZE = 10
+NUM_EPOCHS = 100
 NUM_WORKERS = 2
 IMAGE_HEIGHT = 400
 IMAGE_WIDTH = 400
@@ -54,8 +54,6 @@ def main():
     train_transform = A.Compose(
         [
             A.Resize(height=IMAGE_HEIGHT, width=IMAGE_HEIGHT),
-            A.Rotate(limit=35, p=1.0),
-            A.VerticalFlip(p=0.1),
             A.Normalize(
                 mean=[0.0, 0.0, 0.0],
                 std=[1.0, 1.0, 1.0],

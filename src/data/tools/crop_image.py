@@ -16,7 +16,7 @@ def crop_ref_img(path: str, out_dir: str):
     """
     # Open the raster image file
 
-    files = glob.glob(path + '/*.tif')
+    files = sorted(glob.glob(path + '/*.tif'))
 
     for file in files:
         with rasterio.open(file) as src:
@@ -64,10 +64,8 @@ def crop_other_img(to_crop_path=str, out_dir=str, ref_path=str):
     U-NET. The raster will be croped based on the spatial extent
     of the reference raster.
     '''
-    ref_files = glob.glob(ref_path + '/*.tif')
-    ref_files.sort()
-    to_crop_files = glob.glob(to_crop_path + '/*.tif')
-    to_crop_files.sort()
+    ref_files = sorted(glob.glob(ref_path + '/*.tif'))
+    to_crop_files = sorted(glob.glob(to_crop_path + '/*.tif'))
 
     for ref_file, to_crop_file in zip(ref_files, to_crop_files):
         with rasterio.open(ref_file) as src:
