@@ -2,7 +2,7 @@ import os
 from torch.utils.data import Dataset
 import numpy as np
 import rasterio
-
+import glob
 
 def normalize_image(image):
     # Convert the image to floating-point values

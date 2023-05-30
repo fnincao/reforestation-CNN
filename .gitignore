@@ -1,5 +1,3 @@
-.DS_Store
-
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -134,3 +132,11 @@ dmypy.json
 # Other
 *~
 .DS_Store
+
+# Tif files inside data folder
+/data/gee_data/*tif
+/data/croped_data/*tif
+/data/ai_data/train_images/*tif
+/data/ai_data/train_masks/*tif
+/data/ai_data/val_images/*tif
+/data/ai_data/val_masks/*tif
