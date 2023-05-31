@@ -11,6 +11,10 @@ VAL_MASK_DIR = '../../../data/ai_data/val_masks'
 
 def train_test_split(train_frac: float):
     
+    current_dir = os.getcwd()
+    module_dir = os.path.dirname(os.path.abspath(__file__))
+    os.chdir(module_dir)
+    
     files = sorted(glob.glob(CROPED_DATA_DIR + '*ref.tif'))
     mask_val = sorted(random.sample(files, int(len(files) * train_frac)))
     mask_train = sorted([file for file in files if file not in mask_val])
