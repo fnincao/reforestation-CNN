@@ -3,6 +3,14 @@ from torch.utils.data import Dataset
 import numpy as np
 import rasterio
 import glob
+import albumentations as A
+from albumentations.pytorch import ToTensorV2
+import random
+import numpy as np
+
+random.seed(42)
+np.random.seed(42)
+
 
 def normalize_image(image):
     # Convert the image to floating-point values
@@ -11,37 +19,25 @@ def normalize_image(image):
     image = (image - np.min(image)) / (np.max(image) - np.min(image))
     return image
 
-
-class PlanetDataset(Dataset):
-    def __init__(self,
-                 image_dir,
-                 mask_dir,
-                 transform=None):
-        self.image_dir = image_dir
-        self.mask_dir = mask_dir
-        self.transform = transform
-        self.images = sorted(os.listdir(image_dir))
-
-    # Define len function
-    def __len__(self):
-        return len(self.images)
-
-    def __getitem__(self, index):
-        planet_path = os.path.join(self.image_dir, self.images[index])
+def stack_images(image_dir:str, mask_dir:str, transform=None):
+    images = []
+    masks = []
+    img_files = sorted(glob.glob(image_dir + '/*planet.tif'))
+    mask_files = sorted(glob.glob(mask_dir + '/*tif'))
+    
+    for img, mask in zip(img_files, mask_files):
         
-        s1_path = os.path.join(self.s1_dir,
-                               self.images[index].replace("_planet.tif",
-                                                          "_s1.tif"))
-        s2_path = os.path.join(self.s2_dir,
-                               self.images[index].replace("_planet.tif",
-                                                          "_s2.tif"))
-        mask_path = os.path.join(self.mask_dir,
-                                 self.images[index].replace("_planet.tif",
-                                                            "_ref.tif"))
+        planet_path = img
+        
+        s1_path = img.replace("_planet.tif", "_s1.tif")
+        
+        s2_path = img.replace("_planet.tif", "_s2.tif")
+        
+        mask_path = mask
         
         
-        with rasterio.open(planet_path) as ds,
-             rasterio.open(s1_path) as ds_s1,
+        with rasterio.open(planet_path) as ds,\
+             rasterio.open(s1_path) as ds_s1,\
              rasterio.open(s2_path) as ds_s2:
                     
             ds_nir = normalize_image(ds.read(1))
@@ -57,12 +53,57 @@ class PlanetDataset(Dataset):
             image = (np.stack([ds_nir, ds_red, ds_green, ds_sar,
                               ds_s2_2020, ds_s2_2020, ds_s2_2022], axis=-1))
             
+            
+            
         with rasterio.open(mask_path) as ds:
             mask = ds.read(1).astype(float)
+        
+        format_transform = A.Compose(
+        [
+            A.Resize(height=image.shape[0], width=image.shape[1]),
+            A.Normalize(
+                mean=[0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+                std=[1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0],
+                max_pixel_value=1
 
-        if self.transform is not None:
-            augmentations = self.transform(image=image, mask=mask)
-            image = augmentations['image']
-            mask = augmentations['mask']
+            ),
+            ToTensorV2(),
+        ],)
+        
+        transfomed = format_transform(image=image, mask=mask)
+        img_tensor = transfomed['image']
+        mask_tensor = transfomed['mask']
+        images.append(img_tensor)
+        masks.append(mask_tensor)
+
+
+        if transform is not None:
+            augmentations = transform(image=image, mask=mask)
+            trans_img = augmentations['image']
+            trans_mask = augmentations['mask']
+            images.append(trans_img)
+            masks.append(trans_mask)
+
+    return [images, masks]
+        
+        
+class RSDataset(Dataset):
+    def __init__(self,
+                 image_dir,
+                 mask_dir,
+                 transform=None):
+        self.image_dir = image_dir
+        self.mask_dir = mask_dir
+        self.transform = transform
+        self.images = stack_images(image_dir, mask_dir, transform)
+
+    # Define len function
+    def __len__(self):
+        return len(self.images[1])
+
+    def __getitem__(self, index):
+        
+        image = self.images[0][index]
+        mask = self.images[1][index]
 
         return image, mask
