@@ -1,6 +1,6 @@
 import torch
 import torchvision
-from dataset import PlanetDataset
+from dataset import RSDataset
 from torch.utils.data import DataLoader
 
 
@@ -21,11 +21,10 @@ def get_loaders(
         val_mask_dir,
         batch_size,
         train_transform,
-        val_transform,
         num_workers=4,
         pin_memory=True,):
 
-    train_ds = PlanetDataset(
+    train_ds = RSDataset(
         image_dir=train_img_dir,
         mask_dir=train_mask_dir,
         transform=train_transform
@@ -39,10 +38,10 @@ def get_loaders(
         shuffle=True
     )
 
-    val_ds = PlanetDataset(
+    val_ds = RSDataset(
         image_dir=val_img_dir,
         mask_dir=val_mask_dir,
-        transform=val_transform,
+        transform=None,
     )
 
     val_loader = DataLoader(
@@ -52,7 +51,8 @@ def get_loaders(
         pin_memory=pin_memory,
         shuffle=False
     )
-
+    
+    
     return train_loader, val_loader
 
 
@@ -85,7 +85,7 @@ def check_accuracy(loader, model, device='cuda'):
 def save_predictions_as_imgs(
         loader,
         model,
-        folder='../../../ml_data/saved_images',
+        folder='../../data/ai_data/saved_images',
         device='cuda',):
 
     model.eval()
