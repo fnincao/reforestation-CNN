@@ -2,6 +2,7 @@ import torch
 import torchvision
 from dataset import PlanetDataset
 from torch.utils.data import DataLoader
+import numpy as np
 
 
 def save_checkpoint(state, filename='my_checkpoint.pth.tar'):
@@ -21,7 +22,6 @@ def get_loaders(
         val_mask_dir,
         batch_size,
         train_transform,
-        val_transform,
         num_workers=4,
         pin_memory=True,):
 
@@ -42,7 +42,7 @@ def get_loaders(
     val_ds = PlanetDataset(
         image_dir=val_img_dir,
         mask_dir=val_mask_dir,
-        transform=val_transform,
+        transform=None,
     )
 
     val_loader = DataLoader(
@@ -61,13 +61,21 @@ def check_accuracy(loader, model, device='cuda'):
     num_pixels = 0
     dice_score = 0
     model.eval()
+    
+    true_positives = 0
+    total_positives = 0
 
+ 
     with torch.no_grad():
         for x, y in loader:
             x = x.to(device)
             y = y.to(device).unsqueeze(1)
             preds = torch.sigmoid(model(x))
             preds = (preds > 0.5).float()
+            
+            true_positives += ((preds == 1) & (y == 1)).sum()
+            total_positives += (y ==1).sum()
+            
             num_correct += (preds == y).sum()
             num_pixels += torch.numel(preds)
             dice_score += (2 * (preds * y).sum()) / (
@@ -79,13 +87,14 @@ def check_accuracy(loader, model, device='cuda'):
         )
 
         print(f'Dice Score: {dice_score/len(loader)}')
+        print(f'Producers accuracy: {true_positives/total_positives}')
         model.train()
 
 
 def save_predictions_as_imgs(
         loader,
         model,
-        folder='../../../ml_data/saved_images',
+        folder='../../data/ai_data/saved_images',
         device='cuda',):
 
     model.eval()
