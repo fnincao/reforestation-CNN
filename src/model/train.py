@@ -17,12 +17,27 @@ import numpy as np
 random.seed(42)
 np.random.seed(42)
 
+class DiceLoss(nn.Module):
+    def __init__(self, weight=None, size_average=True):
+        super(DiceLoss, self).__init__()
+
+    def forward(self, inputs, targets, smooth=1):
+
+        inputs = torch.sigmoid(inputs)
+
+        inputs = inputs.view(-1)
+        targets = targets.view(-1)
+
+        intersection = (inputs * targets).sum()
+        dice = (2.*intersection + smooth)/(inputs.sum() + targets.sum() + smooth)
+
+        return 1 - dice
 
 # Hyperparameters
 LEARNING_RATE = 1e-4
 DEVICE = 'cuda' if torch.cuda.is_available() else 'cpu'
 BATCH_SIZE = 32
-NUM_EPOCHS = 30
+NUM_EPOCHS = 100
 NUM_WORKERS = 2
 IMAGE_HEIGHT = 400
 IMAGE_WIDTH = 400
@@ -76,7 +91,7 @@ def main():
     
 
     model = UNET(in_channels=7, out_channels=1).to(DEVICE)
-    loss_fn = nn.BCEWithLogitsLoss()
+    loss_fn = DiceLoss()
     optimizer = optim.Adam(model.parameters(), lr=LEARNING_RATE)
     train_loader, val_loader = get_loaders(
         TRAIN_IMG_DIR,
