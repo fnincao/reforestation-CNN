@@ -134,3 +134,16 @@ dmypy.json
 # Other
 *~
 .DS_Store
+
+
+# Tif files inside data folder
+/data/gee_data/*tif
+/data/croped_data/*tif
+/data/ai_data/train_images/*tif
+/data/ai_data/train_masks/*tif
+/data/ai_data/val_images/*tif
+/data/ai_data/val_masks/*tif
+/data/ai_data/saved_images/*png
+
+# UNET checkpoint file
+src/model/my_checkpoint.pth.tar
