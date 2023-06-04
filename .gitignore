@@ -1,5 +1,3 @@
-.DS_Store
-
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -135,7 +133,6 @@ dmypy.json
 *~
 .DS_Store
 
-
 # Tif files inside data folder
 /data/gee_data/*tif
 /data/croped_data/*tif
@@ -147,3 +144,4 @@ dmypy.json
 
 # UNET checkpoint file
 src/model/my_checkpoint.pth.tar
+src/model_resampling/my_checkpoint.pth.tar

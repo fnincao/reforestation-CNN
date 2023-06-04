@@ -17,9 +17,8 @@ def viz_reference(tile_number: int):
     current_dir = os.getcwd()
     module_dir = os.path.dirname(os.path.abspath(__file__))
     os.chdir(module_dir)
-    imgs_dir = '../../../../data/images/'
-    files_ref = glob.glob(imgs_dir + '2_reference_croped/*.tif')
-    files_ref.sort()
+    imgs_dir = '../../../data/croped_data/'
+    files_ref = sorted(glob.glob(imgs_dir + '*ref.tif'))
     with rasterio.open(files_ref[tile_number]) as reference:
 
         # Read the raster data
@@ -38,9 +37,8 @@ def viz_planet(tile_number: int):
     current_dir = os.getcwd()
     module_dir = os.path.dirname(os.path.abspath(__file__))
     os.chdir(module_dir)
-    imgs_dir = '../../../../data/images/'
-    files_planet = glob.glob(imgs_dir + '4_planet_croped/*.tif')
-    files_planet.sort()
+    imgs_dir = '../../../data/croped_data/'
+    files_planet = sorted(glob.glob(imgs_dir + '*planet.tif'))
     with rasterio.open(files_planet[tile_number]) as planet:
 
         # Read the raster data
@@ -70,9 +68,8 @@ def viz_s1(tile_number: int):
     current_dir = os.getcwd()
     module_dir = os.path.dirname(os.path.abspath(__file__))
     os.chdir(module_dir)
-    imgs_dir = '../../../../data/images/'
-    files_s1 = glob.glob(imgs_dir + '6_sentinel1_croped/*.tif')
-    files_s1.sort()
+    imgs_dir = '../../../data/croped_data/'
+    files_s1 = sorted(glob.glob(imgs_dir + '*s1.tif'))
     with rasterio.open(files_s1[tile_number]) as s1:
 
         # Read the raster data
@@ -94,9 +91,8 @@ def viz_s2(tile_number: int):
     current_dir = os.getcwd()
     module_dir = os.path.dirname(os.path.abspath(__file__))
     os.chdir(module_dir)
-    imgs_dir = '../../../../data/images/'
-    files_s2 = glob.glob(imgs_dir + '8_sentinel2_croped/*.tif')
-    files_s2.sort()
+    imgs_dir = '../../../data/croped_data/'
+    files_s2 = sorted(glob.glob(imgs_dir + '*s2.tif'))
     with rasterio.open(files_s2[tile_number]) as s2_ds:
 
         # Read the raster data
@@ -130,15 +126,11 @@ def viz_all(tile_number: int):
     current_dir = os.getcwd()
     module_dir = os.path.dirname(os.path.abspath(__file__))
     os.chdir(module_dir)
-    imgs_dir = '../../../../data/images/'
-    files_ref = glob.glob(imgs_dir + '2_reference_croped/*.tif')
-    files_ref.sort()
-    files_planet = glob.glob(imgs_dir + '4_planet_croped/*.tif')
-    files_planet.sort()
-    files_s1 = glob.glob(imgs_dir + '6_sentinel1_croped/*.tif')
-    files_s1.sort()
-    files_s2 = glob.glob(imgs_dir + '8_sentinel2_croped/*.tif')
-    files_s2.sort()
+    imgs_dir = '../../../data/croped_data/'
+    files_ref = sorted(glob.glob(imgs_dir + '*ref.tif'))
+    files_planet = sorted(glob.glob(imgs_dir + '*planet.tif'))
+    files_s1 = sorted(glob.glob(imgs_dir + '*s1.tif'))
+    files_s2 = sorted(glob.glob(imgs_dir + '*s2.tif'))
     with rasterio.open(files_ref[tile_number]) as ref_ds,\
          rasterio.open(files_planet[tile_number]) as planet_ds,\
          rasterio.open(files_s1[tile_number]) as s1_ds,\
