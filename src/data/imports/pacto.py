@@ -1,4 +1,4 @@
-'''Module to import and filter the dataset provided from Pacto'''
+'''File to import/filter the dataset provided by Pacto'''
 
 import geopandas as gpd
 import pandas as pd

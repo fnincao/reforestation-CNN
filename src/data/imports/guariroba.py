@@ -1,4 +1,4 @@
-'''Module to import and filter the dataset provided from Guariroba'''
+'''File to import/filter the dataset provided by Guariroba'''
 
 import geopandas as gpd
 import glob

@@ -1,4 +1,4 @@
-'''Module to import and filter the dataset provided from UHE PROMISSAO'''
+'''File to import/filter the dataset provided by UHE PROMISSAO'''
 import glob
 import geopandas as gpd
 import fiona

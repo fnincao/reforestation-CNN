@@ -1,4 +1,4 @@
-'''Module to import and filter the dataset provided from CLICK'''
+'''File to import/filter the dataset provided by CLICK'''
 
 import geopandas as gpd
 import pandas as pd
