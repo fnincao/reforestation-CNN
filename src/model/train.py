@@ -32,12 +32,32 @@ class DiceLoss(nn.Module):
         dice = (2.*intersection + smooth)/(inputs.sum() + targets.sum() + smooth)
 
         return 1 - dice
+    
+class TverskyLoss(nn.Module):
+    def __init__(self, alpha=0.6, beta=0.4):
+        super(TverskyLoss, self).__init__()
+        self.alpha = alpha
+        self.beta = beta
 
+    def forward(self, predicted, target):
+        predicted = predicted.view(-1)
+        target = target.view(-1)
+
+        true_positives = torch.sum(predicted * target)
+        false_positives = torch.sum(predicted * (1 - target))
+        false_negatives = torch.sum((1 - predicted) * target)
+
+        tversky_index = true_positives / (true_positives + self.alpha * false_positives + self.beta * false_negatives)
+        tversky_loss = 1 - tversky_index
+
+        return tversky_loss
+    
+    
 # Hyperparameters
-LEARNING_RATE = 1e-4
+LEARNING_RATE = 1e-6
 DEVICE = 'cuda' if torch.cuda.is_available() else 'cpu'
 BATCH_SIZE = 32
-NUM_EPOCHS = 100
+NUM_EPOCHS = 30
 NUM_WORKERS = 2
 IMAGE_HEIGHT = 400
 IMAGE_WIDTH = 400
