@@ -11,20 +11,55 @@ from utils import (load_checkpoint, # noqa
                    check_accuracy,
                    save_predictions_as_imgs)
 
+class DiceLoss(nn.Module):
+    def __init__(self, weight=None, size_average=True):
+        super(DiceLoss, self).__init__()
+
+    def forward(self, inputs, targets, smooth=1):
+
+        inputs = torch.sigmoid(inputs)
+
+        inputs = inputs.view(-1)
+        targets = targets.view(-1)
+
+        intersection = (inputs * targets).sum()
+        dice = (2.*intersection + smooth)/(inputs.sum() + targets.sum() + smooth)
+
+        return 1 - dice
+
+class TverskyLoss(nn.Module):
+    def __init__(self, alpha=0.2, beta=0.8):
+        super(TverskyLoss, self).__init__()
+        self.alpha = alpha
+        self.beta = beta
+
+    def forward(self, predicted, target):
+        predicted = predicted.view(-1)
+        target = target.view(-1)
+
+        true_positives = torch.sum(predicted * target)
+        false_positives = torch.sum(predicted * (1 - target))
+        false_negatives = torch.sum((1 - predicted) * target)
+
+        tversky_index = true_positives / (true_positives + self.alpha * false_positives + self.beta * false_negatives)
+        tversky_loss = 1 - tversky_index
+
+        return tversky_loss
+
 # Hyperparameters
 LEARNING_RATE = 1e-4
 DEVICE = 'cuda' if torch.cuda.is_available() else 'cpu'
-BATCH_SIZE = 10
-NUM_EPOCHS = 100
+BATCH_SIZE = 32
+NUM_EPOCHS = 30
 NUM_WORKERS = 2
 IMAGE_HEIGHT = 400
 IMAGE_WIDTH = 400
 PIN_MEMORY = True
-LOAD_MODEL = True
-TRAIN_IMG_DIR = '../../../ml_data/train_images'
-TRAIN_MASK_DIR = '../../../ml_data/train_masks'
-VAL_IMG_DIR = '../../../ml_data/val_images'
-VAL_MASK_DIR = '../../../ml_data/val_masks'
+LOAD_MODEL = False
+TRAIN_IMG_DIR = '../../data/ai_data/train_images'
+TRAIN_MASK_DIR = '../../data/ai_data/train_masks'
+VAL_IMG_DIR = '../../data/ai_data/val_images'
+VAL_MASK_DIR = '../../data/ai_data/val_masks'
 
 
 # One epoch of training
@@ -54,6 +89,9 @@ def main():
     train_transform = A.Compose(
         [
             A.Resize(height=IMAGE_HEIGHT, width=IMAGE_HEIGHT),
+            A.Rotate(limit=35, p=1.0),
+            A.HorizontalFlip(p=0.5),
+            A.VerticalFlip(p=0.1),
             A.Normalize(
                 mean=[0.0, 0.0, 0.0],
                 std=[1.0, 1.0, 1.0],
@@ -64,20 +102,8 @@ def main():
         ],
     )
 
-    val_transforms = A.Compose(
-        [
-            A.Resize(height=IMAGE_HEIGHT, width=IMAGE_WIDTH),
-            A.Normalize(
-                mean=[0.0, 0.0, 0.0],
-                std=[1.0, 1.0, 1.0],
-                max_pixel_value=1
-
-            ),
-            ToTensorV2(),
-        ],
-    )
     model = UNET(in_channels=3, out_channels=1).to(DEVICE)
-    loss_fn = nn.BCEWithLogitsLoss()
+    loss_fn = TverskyLoss()
     optimizer = optim.Adam(model.parameters(), lr=LEARNING_RATE)
     train_loader, val_loader = get_loaders(
         TRAIN_IMG_DIR,
@@ -86,7 +112,6 @@ def main():
         VAL_MASK_DIR,
         BATCH_SIZE,
         train_transform,
-        val_transforms,
         NUM_WORKERS,
         PIN_MEMORY,
     )
