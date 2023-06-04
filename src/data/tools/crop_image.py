@@ -58,20 +58,21 @@ def crop_ref_img(path: str, out_dir: str):
             dst.write(windowed_data)
 
 
-def crop_other_img(sensor:str, to_crop_path:str, out_dir:str, ref_path:str):
+def crop_other_img(sensor: str, to_crop_path: str,
+                   out_dir: str, ref_path: str):
     '''
     Function to crop all the other raster to the right size for
     U-NET. The raster will be croped based on the spatial extent
     of the reference raster.
     '''
     ref_files = sorted(glob.glob(ref_path + '/*ref.tif'))
-    
+
     if sensor == 'planet':
         to_crop_files = sorted(glob.glob(to_crop_path + '/*planet.tif'))
-    
+
     elif sensor == 's1':
         to_crop_files = sorted(glob.glob(to_crop_path + '/*s1.tif'))
-        
+
     elif sensor == 's2':
         to_crop_files = sorted(glob.glob(to_crop_path + '/*s2.tif'))
 

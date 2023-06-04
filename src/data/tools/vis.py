@@ -18,7 +18,7 @@ def viz_reference(tile_number: int):
     module_dir = os.path.dirname(os.path.abspath(__file__))
     os.chdir(module_dir)
     imgs_dir = '../../../data/croped_data/'
-    files_ref =sorted(glob.glob(imgs_dir + '*ref.tif'))
+    files_ref = sorted(glob.glob(imgs_dir + '*ref.tif'))
     with rasterio.open(files_ref[tile_number]) as reference:
 
         # Read the raster data

@@ -2,7 +2,7 @@ import torch
 import albumentations as A
 from albumentations.pytorch import ToTensorV2
 from tqdm import tqdm
-import torch.nn as nn
+from loss_fn import TverskyLoss, DiceLoss # noqa
 import torch.optim as optim
 from model import UNET
 from utils import (load_checkpoint, # noqa
@@ -17,42 +17,6 @@ import numpy as np
 random.seed(42)
 np.random.seed(42)
 
-class DiceLoss(nn.Module):
-    def __init__(self, weight=None, size_average=True):
-        super(DiceLoss, self).__init__()
-
-    def forward(self, inputs, targets, smooth=1):
-
-        inputs = torch.sigmoid(inputs)
-
-        inputs = inputs.view(-1)
-        targets = targets.view(-1)
-
-        intersection = (inputs * targets).sum()
-        dice = (2.*intersection + smooth)/(inputs.sum() + targets.sum() + smooth)
-
-        return 1 - dice
-    
-class TverskyLoss(nn.Module):
-    def __init__(self, alpha=0.6, beta=0.4):
-        super(TverskyLoss, self).__init__()
-        self.alpha = alpha
-        self.beta = beta
-
-    def forward(self, predicted, target):
-        predicted = predicted.view(-1)
-        target = target.view(-1)
-
-        true_positives = torch.sum(predicted * target)
-        false_positives = torch.sum(predicted * (1 - target))
-        false_negatives = torch.sum((1 - predicted) * target)
-
-        tversky_index = true_positives / (true_positives + self.alpha * false_positives + self.beta * false_negatives)
-        tversky_loss = 1 - tversky_index
-
-        return tversky_loss
-    
-    
 # Hyperparameters
 LEARNING_RATE = 1e-6
 DEVICE = 'cuda' if torch.cuda.is_available() else 'cpu'
@@ -108,7 +72,6 @@ def main():
             ToTensorV2(),
         ],
     )
-    
 
     model = UNET(in_channels=7, out_channels=1).to(DEVICE)
     loss_fn = DiceLoss()
