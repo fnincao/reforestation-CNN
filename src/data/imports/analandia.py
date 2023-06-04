@@ -1,4 +1,4 @@
-'''Module to import and filter the dataset provided from Analandia'''
+'''File to import/filter the dataset provided by Analandia'''
 
 import geopandas as gpd
 import zipfile

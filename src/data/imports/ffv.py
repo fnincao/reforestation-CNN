@@ -1,4 +1,4 @@
-'''Module to import and filter the dataset provided from FFV'''
+'''File to import/filter the dataset provided by FFV'''
 import glob
 import geopandas as gpd
 import fiona

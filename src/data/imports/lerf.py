@@ -1,4 +1,4 @@
-'''Module to import and filter the dataset provided from SOS'''
+'''File to import/filter the dataset provided by SOS'''
 
 import geopandas as gpd
 

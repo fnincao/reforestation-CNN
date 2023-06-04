@@ -1,4 +1,4 @@
-'''Module to import and filter the dataset provided from AES BRASIL'''
+'''File to compile all the dataset into a final version'''
 
 import geopandas as gpd
 import glob

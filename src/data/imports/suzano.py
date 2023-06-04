@@ -1,4 +1,4 @@
-'''Module to import and filter the dataset provided from Suzano'''
+'''File to import/filter the dataset provided by Suzano'''
 
 import geopandas as gpd
 
