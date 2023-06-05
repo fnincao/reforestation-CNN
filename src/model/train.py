@@ -1,4 +1,5 @@
 import torch
+import torch.nn as nn
 import albumentations as A
 from albumentations.pytorch import ToTensorV2
 from tqdm import tqdm
@@ -14,8 +15,8 @@ from utils import (load_checkpoint, # noqa
 # Hyperparameters
 LEARNING_RATE = 1e-4
 DEVICE = 'cuda' if torch.cuda.is_available() else 'cpu'
-BATCH_SIZE = 32
-NUM_EPOCHS = 30
+BATCH_SIZE = 16
+NUM_EPOCHS = 100
 NUM_WORKERS = 2
 IMAGE_HEIGHT = 400
 IMAGE_WIDTH = 400
@@ -68,7 +69,7 @@ def main():
     )
 
     model = UNET(in_channels=3, out_channels=1).to(DEVICE)
-    loss_fn = TverskyLoss()
+    loss_fn = DiceLoss()
     optimizer = optim.Adam(model.parameters(), lr=LEARNING_RATE)
     train_loader, val_loader = get_loaders(
         TRAIN_IMG_DIR,
