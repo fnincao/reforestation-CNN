@@ -3,7 +3,7 @@
 import rasterio
 import numpy as np
 import matplotlib.pyplot as plt
-from skimage.exposure import rescale_intensity
+from skimage.exposure import rescale_intensity, adjust_gamma
 import glob
 import os
 
@@ -56,6 +56,39 @@ def viz_planet(tile_number: int):
         rgb = np.stack([res_nir, res_red, res_green], axis=-1)
 
         plt.imshow(rgb)
+        plt.title(files_planet[tile_number].split('/')[-1][:-4])
+
+    os.chdir(current_dir)
+
+    
+def viz_red(tile_number: int):
+    '''
+    Helper to vizualize planet imagery download from GEE
+    '''
+    current_dir = os.getcwd()
+    module_dir = os.path.dirname(os.path.abspath(__file__))
+    os.chdir(module_dir)
+    imgs_dir = '../../../data/croped_data/'
+    files_planet = sorted(glob.glob(imgs_dir + '*red.tif'))
+    with rasterio.open(files_planet[tile_number]) as planet:
+
+        # Read the raster data
+        nir_planet = planet.read(1).astype(np.uint16)
+        red_planet = planet.read(2).astype(np.uint16)
+        green_planet = planet.read(3).astype(np.uint16)
+
+        res_nir = rescale_intensity(nir_planet, in_range=(0, 3000),
+                                    out_range=(0, 255)).astype(np.uint8)
+        res_red = rescale_intensity(red_planet, in_range=(0, 3000),
+                                    out_range=(0, 255)).astype(np.uint8)
+        res_green = rescale_intensity(green_planet, in_range=(0, 3000),
+                                      out_range=(0, 255)).astype(np.uint8)
+
+        rgb = np.stack([res_nir, res_red, res_green], axis=-1)
+        
+        gamma_corrected = adjust_gamma(rgb, 0.8)
+        
+        plt.imshow(gamma_corrected)
         plt.title(files_planet[tile_number].split('/')[-1][:-4])
 
     os.chdir(current_dir)

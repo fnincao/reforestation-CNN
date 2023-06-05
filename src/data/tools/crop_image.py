@@ -1,6 +1,6 @@
 '''
-Module to crop image chips to have the same spatial extext
-and the right pixel resolution
+Module to crop image chips in order to achieve
+consistent spatial extent and pixel resolution
 '''
 import glob
 import rasterio
@@ -10,9 +10,17 @@ from rasterio.windows import from_bounds
 
 def crop_ref_img(path: str, out_dir: str):
     """
-    Function to crop the reference raster to the right size for
-    the U-NET (400x400). The raster will be croped using the central
-    pixel as a reference.
+    This function crops the reference raster to a size of
+    400x400 pixels by utilizing the central pixel as a reference
+    point. The resulting cropped raster is then saved in the 
+    specified output directory.
+
+    Parameters:
+    - path (str): The file path to the reference raster.
+    - out_dir (str): The output directory where the cropped raster will be saved.
+
+    Returns:
+    - None
     """
     # Open the raster image file
 
@@ -75,6 +83,9 @@ def crop_other_img(sensor: str, to_crop_path: str,
 
     elif sensor == 's2':
         to_crop_files = sorted(glob.glob(to_crop_path + '/*s2.tif'))
+        
+    elif sensor == 'red':
+        to_crop_files = sorted(glob.glob(to_crop_path + '/*red.tif'))
 
     for ref_file, to_crop_file in zip(ref_files, to_crop_files):
         with rasterio.open(ref_file) as src:
