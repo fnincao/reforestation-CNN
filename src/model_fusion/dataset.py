@@ -18,11 +18,11 @@ def normalize_image(image):
     return image
 
 
-def gen_images(sensor:str, image_dir: str, mask_dir=None, transform=None,):
+def gen_images(sensor: str, image_dir: str, mask_dir=None, transform=None,):
     random.seed(42)
     images = []
     masks = []
-    img_files = sorted(glob.glob(image_dir + sensor + '.tif')
+    img_files = sorted(glob.glob(image_dir + sensor + '.tif'))
     if sensor == 'red':
         mask_files = sorted(glob.glob(mask_dir + '/*tif'))
         for img, mask in zip(img_files, mask_files):
@@ -30,7 +30,7 @@ def gen_images(sensor:str, image_dir: str, mask_dir=None, transform=None,):
                 image = np.transpose(ds.read(), (1, 2, 0))
                 norm_img = normalize_image(image)
 
-            with rasterio.open(mask_path) as ds:
+            with rasterio.open(mask) as ds:
                 mask = ds.read(1).astype(float)
 
             format_transform = A.Compose([
@@ -44,14 +44,14 @@ def gen_images(sensor:str, image_dir: str, mask_dir=None, transform=None,):
                 ToTensorV2(),
             ],)
 
-            transfomed = format_transform(image=image, mask=mask)
+            transfomed = format_transform(image=norm_img, mask=mask)
             img_tensor = transfomed['image']
             mask_tensor = transfomed['mask']
             images.append(img_tensor)
             masks.append(mask_tensor)
 
             if transform is not None:
-                augmentations = transform(image=image, mask=mask)
+                augmentations = transform(image=norm_img, mask=mask)
                 trans_img = augmentations['image']
                 trans_mask = augmentations['mask']
                 images.append(trans_img)
@@ -64,7 +64,7 @@ def gen_images(sensor:str, image_dir: str, mask_dir=None, transform=None,):
             with rasterio.open(img) as ds:
                 image = np.transpose(ds.read(), (1, 2, 0))
                 norm_img = normalize_image(image)
-                       
+
             format_transform = A.Compose([
                 A.Resize(height=image.shape[0], width=image.shape[1]),
                 A.Normalize(
@@ -75,18 +75,18 @@ def gen_images(sensor:str, image_dir: str, mask_dir=None, transform=None,):
                 ToTensorV2(),
             ],)
 
-            transfomed = format_transform(image=image)
+            transfomed = format_transform(image=norm_img)
             img_tensor = transfomed['image']
             images.append(img_tensor)
 
             if transform is not None:
-                augmentations = transform(image=image)
+                augmentations = transform(image=norm_img)
                 trans_img = augmentations['image']
                 images.append(trans_img)
 
         return images
 
-        
+
 class PlanetDataset(Dataset):
     def __init__(self,
                  image_dir,
@@ -109,7 +109,7 @@ class PlanetDataset(Dataset):
 
         return image, mask
 
-                       
+
 class SentinelDataset(Dataset):
     def __init__(self,
                  image_dir,
@@ -128,7 +128,7 @@ class SentinelDataset(Dataset):
     def __getitem__(self, index):
         image = self.images[index]
         return image
-                       
+
 
 class PalsarDataset(Dataset):
     def __init__(self,
