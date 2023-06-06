@@ -86,17 +86,17 @@ class UNET(nn.Module):
         x = self.downs[0](x)
         skip_connections.append(x)
         x = self.pool(x)
-        
+
         x = torch.cat((y, x), dim=1)
         x = self.downs[1](x)
         skip_connections.append(x)
         x = self.pool(x)
-        
+
         x = torch.cat((z, x), dim=1)
         x = self.downs[2](x)
         skip_connections.append(x)
         x = self.pool(x)
-        
+
         x = self.downs[3](x)
         skip_connections.append(x)
         x = self.pool(x)
