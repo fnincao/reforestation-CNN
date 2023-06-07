@@ -20,16 +20,17 @@ def get_loaders(
         val_img_dir,
         val_mask_dir,
         batch_size,
-        train_transform,
         num_workers=4,
         pin_memory=True,):
-
+    
+    
     train_ds = RSDataset(
         image_dir=train_img_dir,
         mask_dir=train_mask_dir,
-        transform=train_transform
+        transform=True
     )
-
+    
+    torch.manual_seed(42)
     train_loader = DataLoader(
         train_ds,
         batch_size=batch_size,
@@ -37,12 +38,13 @@ def get_loaders(
         pin_memory=pin_memory,
         shuffle=True
     )
-
+    
     val_ds = RSDataset(
         image_dir=val_img_dir,
         mask_dir=val_mask_dir,
-        transform=None,
+        transform=False,
     )
+
 
     val_loader = DataLoader(
         val_ds,
@@ -52,6 +54,7 @@ def get_loaders(
         shuffle=False
     )
 
+    
     return train_loader, val_loader
 
 
@@ -65,18 +68,20 @@ def check_accuracy(loader, model, device='cuda'):
     total_positives = 0
 
     with torch.no_grad():
-        for x, y in loader:
+        for x, y, z, m in loader:
             x = x.to(device)
-            y = y.to(device).unsqueeze(1)
-            preds = torch.sigmoid(model(x))
+            y = y.to(device)
+            z = z.to(device)
+            m = m.to(device).unsqueeze(1)
+            preds = torch.sigmoid(model(x, y, z))
             preds = (preds > 0.5).float()
-            true_positives += ((preds == 1) & (y == 1)).sum()
-            total_positives += (y == 1).sum()
+            true_positives += ((preds == 1) & (m == 1)).sum()
+            total_positives += (m == 1).sum()
 
-            num_correct += (preds == y).sum()
+            num_correct += (preds == m).sum()
             num_pixels += torch.numel(preds)
-            dice_score += (2 * (preds * y).sum()) / (
-                (preds + y).sum() + 1e-8
+            dice_score += (2 * (preds * m).sum()) / (
+                (preds + m).sum() + 1e-8
             )
 
         print(
@@ -95,15 +100,18 @@ def save_predictions_as_imgs(
         device='cuda',):
 
     model.eval()
-    for idx, (x, y) in enumerate(loader):
+    for idx, (x, y, z, m) in enumerate(loader):
         x = x.to(device=device)
+        y = y.to(device=device)
+        z = z.to(device=device)
+        m = m.to(device=device)
         with torch.no_grad():
-            preds = torch.sigmoid(model(x))
+            preds = torch.sigmoid(model(x, y, z))
             preds = (preds > 0.5).float()
         torchvision.utils.save_image(
             preds, f'{folder}/pred_{idx}.png'
         )
-        torchvision.utils.save_image(y.unsqueeze(1),
+        torchvision.utils.save_image(m.unsqueeze(1),
                                      f'{folder}/gt_{idx}.png')
 
         model.train()
