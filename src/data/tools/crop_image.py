@@ -74,18 +74,8 @@ def crop_other_img(sensor: str, to_crop_path: str,
     of the reference raster.
     '''
     ref_files = sorted(glob.glob(ref_path + '/*ref.tif'))
-
-    if sensor == 'planet':
-        to_crop_files = sorted(glob.glob(to_crop_path + '/*planet.tif'))
-
-    elif sensor == 's1':
-        to_crop_files = sorted(glob.glob(to_crop_path + '/*s1.tif'))
-
-    elif sensor == 's2':
-        to_crop_files = sorted(glob.glob(to_crop_path + '/*s2.tif'))
-        
-    elif sensor == 'red':
-        to_crop_files = sorted(glob.glob(to_crop_path + '/*red.tif'))
+    
+    to_crop_files = sorted(glob.glob(to_crop_path + '/*' + sensor + '.tif'))
 
     for ref_file, to_crop_file in zip(ref_files, to_crop_files):
         with rasterio.open(ref_file) as src:

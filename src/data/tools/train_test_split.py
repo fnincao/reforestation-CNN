@@ -9,7 +9,7 @@ TRAIN_MASK_DIR = '../../../data/ai_data/train_masks'
 VAL_IMG_DIR = '../../../data/ai_data/val_images'
 VAL_MASK_DIR = '../../../data/ai_data/val_masks'
 
-
+random.seed(42)
 def train_test_split(train_frac: float,
                      Planet: bool,
                      Planet_red: bool,
@@ -38,14 +38,14 @@ def train_test_split(train_frac: float,
     s2_val = [file.replace('ref.tif', 's2.tif') for file in mask_val]
     s2_train = [file.replace('ref.tif', 's2.tif') for file in mask_train]
     
-    s2_val = [file.replace('ref.tif', 's2.tif') for file in mask_val]
-    s2_train = [file.replace('ref.tif', 's2.tif') for file in mask_train]
+    palsar_val = [file.replace('ref.tif', 'palsar.tif') for file in mask_val]
+    palsar_train = [file.replace('ref.tif', 'palsar.tif') for file in mask_train]
 
     train_images = (planet_train * Planet) + (red_train * Planet_red) +\
-                   (s1_train * S1) + (s2_train * S2)
+                   (s1_train * S1) + (s2_train * S2) + (palsar_train * Palsar)
         
     val_images = (planet_val * Planet) + (red_val * Planet_red) +\
-                 (s1_val * S1) + (s2_val * S2)
+                 (s1_val * S1) + (s2_val * S2) + (palsar_val * Palsar)
 
     for image in train_images:
         shutil.copy(image, TRAIN_IMG_DIR)
