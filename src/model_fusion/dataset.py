@@ -15,11 +15,12 @@ def normalize_image(image):
     return image
 
 
-def gen_images(sensor:str, image_dir: str, mask_dir=None, transform=None,):
+def gen_images(sensor: str, image_dir: str, mask_dir=None, transform=None,):
     random.seed(42)
     images = []
     masks = []
     img_files = sorted(glob.glob(image_dir + '/*' + sensor + '.tif'))
+
     if sensor == 'red':
         mask_files = sorted(glob.glob(mask_dir + '/*tif'))
         for img, mask in zip(img_files, mask_files):
@@ -74,7 +75,7 @@ def gen_images(sensor:str, image_dir: str, mask_dir=None, transform=None,):
             with rasterio.open(img) as ds:
                 image = np.transpose(ds.read(), (1, 2, 0))
                 norm_img = normalize_image(image)
-                       
+
             format_transform = A.Compose([
                 A.Resize(height=image.shape[0], width=image.shape[1]),
                 A.Normalize(
@@ -108,7 +109,7 @@ def gen_images(sensor:str, image_dir: str, mask_dir=None, transform=None,):
                 images.append(trans_img)
         return images
 
-        
+
 class RSDataset(Dataset):
     def __init__(self,
                  image_dir,
@@ -133,3 +134,4 @@ class RSDataset(Dataset):
         palsar = self.palsar[index]
 
         return image, s1, palsar, mask
+
