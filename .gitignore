@@ -141,8 +141,11 @@ dmypy.json
 /data/ai_data/val_images/*tif
 /data/ai_data/val_masks/*tif
 /data/ai_data/saved_images/*png
+/data/figures/*png
 
 # UNET checkpoint file
 src/model/my_checkpoint.pth.tar
 src/model_resampling/my_checkpoint.pth.tar
 src/model_fusion/my_checkpoint.pth.tar
+
+
