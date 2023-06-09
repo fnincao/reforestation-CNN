@@ -50,7 +50,7 @@ class UNET(nn.Module):
         for feature in features:
             self.downs.append(DoubleConv(in_channels, feature))
             if feature in [64, 128]:
-                in_channels = feature + 5
+                in_channels = feature + 3
             else:
                 in_channels = feature
 
@@ -120,8 +120,8 @@ class UNET(nn.Module):
 
 def test():
     x = torch.randn((3, 1, 400, 400))
-    y = torch.randn((3, 5, 200, 200))
-    z = torch.randn((3, 5, 100, 100))
+    y = torch.randn((3, 3, 200, 200))
+    z = torch.randn((3, 3, 100, 100))
     model = UNET(in_channels=1, out_channels=1)
     preds = model(x, y, z)
     print(preds.shape)

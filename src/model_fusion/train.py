@@ -59,7 +59,7 @@ def train_fn(loader, model, optimizer, loss_fn, scaler):
 
 
 def main():
-    model = UNET(in_channels=5, out_channels=1).to(DEVICE)
+    model = UNET(in_channels=3, out_channels=1).to(DEVICE)
     loss_fn = DiceLoss()
     optimizer = optim.Adam(model.parameters(), lr=LEARNING_RATE)
     train_loader, val_loader = get_loaders(

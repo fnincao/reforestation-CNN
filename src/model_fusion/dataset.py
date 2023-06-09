@@ -21,7 +21,7 @@ def gen_images(sensor: str, image_dir: str, mask_dir=None, transform=None,):
     masks = []
     img_files = sorted(glob.glob(image_dir + '/*' + sensor + '.tif'))
 
-    if sensor == 'red':
+    if sensor == 'ndvi':
         mask_files = sorted(glob.glob(mask_dir + '/*tif'))
         for img, mask in zip(img_files, mask_files):
             with rasterio.open(img) as ds:
@@ -34,8 +34,8 @@ def gen_images(sensor: str, image_dir: str, mask_dir=None, transform=None,):
             format_transform = A.Compose([
                 A.Resize(height=image.shape[0], width=image.shape[1]),
                 A.Normalize(
-                    mean=[0.0, 0.0, 0.0, 0.0, 0.0],
-                    std=[1.0, 1.0, 1.0, 1.0, 1.0],
+                    mean=[0.0, 0.0, 0.0],
+                    std=[1.0, 1.0, 1.0],
                     max_pixel_value=1
 
                 ),
@@ -54,8 +54,8 @@ def gen_images(sensor: str, image_dir: str, mask_dir=None, transform=None,):
                 A.HorizontalFlip(p=0.5),
                 A.VerticalFlip(p=0.1),
                 A.Normalize(
-                mean=[0.0, 0.0, 0.0, 0.0, 0.0],
-                std=[1.0, 1.0, 1.0, 1.0, 1.0],
+                mean=[0.0, 0.0, 0.0],
+                std=[1.0, 1.0, 1.0],
                 max_pixel_value=1
                 ),
                 ToTensorV2(),
@@ -79,8 +79,8 @@ def gen_images(sensor: str, image_dir: str, mask_dir=None, transform=None,):
             format_transform = A.Compose([
                 A.Resize(height=image.shape[0], width=image.shape[1]),
                 A.Normalize(
-                    mean=[0.0, 0.0, 0.0, 0.0, 0.0],
-                    std=[1.0, 1.0, 1.0, 1.0, 1.0],
+                    mean=[0.0, 0.0, 0.0],
+                    std=[1.0, 1.0, 1.0],
                     max_pixel_value=1
                 ),
                 ToTensorV2(),
@@ -96,8 +96,8 @@ def gen_images(sensor: str, image_dir: str, mask_dir=None, transform=None,):
                 A.HorizontalFlip(p=0.5),
                 A.VerticalFlip(p=0.1),
                 A.Normalize(
-                mean=[0.0, 0.0, 0.0, 0.0, 0.0],
-                std=[1.0, 1.0, 1.0, 1.0, 1.0],
+                mean=[0.0, 0.0, 0.0],
+                std=[1.0, 1.0, 1.0],
                 max_pixel_value=1
                 ),
                 ToTensorV2(),
@@ -118,7 +118,7 @@ class RSDataset(Dataset):
         self.image_dir = image_dir
         self.mask_dir = mask_dir
         self.transform = transform
-        self.images = gen_images('red', image_dir, mask_dir, transform)
+        self.images = gen_images('ndvi', image_dir, mask_dir, transform)
         self.s1 = gen_images('s1', image_dir, None, transform)
         self.palsar = gen_images('palsar', image_dir, None, transform)
 

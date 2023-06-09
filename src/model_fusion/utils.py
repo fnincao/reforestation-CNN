@@ -30,7 +30,6 @@ def get_loaders(
         transform=True
     )
     
-    torch.manual_seed(42)
     train_loader = DataLoader(
         train_ds,
         batch_size=batch_size,
