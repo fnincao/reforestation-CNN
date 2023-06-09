@@ -21,7 +21,7 @@ def normalize_image(image):
 def stack_images(image_dir: str, mask_dir: str, transform=None):
     images = []
     masks = []
-    img_files = sorted(glob.glob(image_dir + '/*red.tif'))
+    img_files = sorted(glob.glob(image_dir + '/*ndvi.tif'))
     mask_files = sorted(glob.glob(mask_dir + '/*tif'))
 
     for img, mask in zip(img_files, mask_files):
