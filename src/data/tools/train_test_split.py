@@ -14,7 +14,7 @@ def train_test_split(train_frac: float,
                      Planet: bool,
                      Planet_red: bool,
                      S1: bool,
-                     S2: bool,
+                     NDVI: bool,
                      Palsar: bool):
 
     current_dir = os.getcwd()
@@ -35,17 +35,17 @@ def train_test_split(train_frac: float,
     s1_val = [file.replace('ref.tif', 's1.tif') for file in mask_val]
     s1_train = [file.replace('ref.tif', 's1.tif') for file in mask_train]
 
-    s2_val = [file.replace('ref.tif', 's2.tif') for file in mask_val]
-    s2_train = [file.replace('ref.tif', 's2.tif') for file in mask_train]
+    NDVI_val = [file.replace('ref.tif', 'ndvi.tif') for file in mask_val]
+    NDVI_train = [file.replace('ref.tif', 'ndvi.tif') for file in mask_train]
     
     palsar_val = [file.replace('ref.tif', 'palsar.tif') for file in mask_val]
     palsar_train = [file.replace('ref.tif', 'palsar.tif') for file in mask_train]
 
     train_images = (planet_train * Planet) + (red_train * Planet_red) +\
-                   (s1_train * S1) + (s2_train * S2) + (palsar_train * Palsar)
+                   (s1_train * S1) + (NDVI_train * NDVI) + (palsar_train * Palsar)
         
     val_images = (planet_val * Planet) + (red_val * Planet_red) +\
-                 (s1_val * S1) + (s2_val * S2) + (palsar_val * Palsar)
+                 (s1_val * S1) + (NDVI_val * NDVI) + (palsar_val * Palsar)
 
     for image in train_images:
         shutil.copy(image, TRAIN_IMG_DIR)
