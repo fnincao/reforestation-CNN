@@ -14,14 +14,14 @@ def normalize_image(image):
     # Convert the image to floating-point values
     image = image.astype(np.float32)
     # Normalize the image to the range [0, 1]
-    image = (image - np.min(image)) / (np.max(image) - np.min(image))
+    image = image / 10000
     return image
 
 
 def stack_images(image_dir: str, mask_dir: str, transform=None):
     images = []
     masks = []
-    img_files = sorted(glob.glob(image_dir + '/*ndvi.tif'))
+    img_files = sorted(glob.glob(image_dir + '/*planet.tif'))
     mask_files = sorted(glob.glob(mask_dir + '/*tif'))
 
     for img, mask in zip(img_files, mask_files):
@@ -38,12 +38,6 @@ def stack_images(image_dir: str, mask_dir: str, transform=None):
 
         format_transform = A.Compose([
             A.Resize(height=image.shape[0], width=image.shape[1]),
-            A.Normalize(
-                mean=[0.0, 0.0, 0.0],
-                std=[1.0, 1.0, 1.0],
-                max_pixel_value=1
-
-            ),
             ToTensorV2(),
         ],)
 
