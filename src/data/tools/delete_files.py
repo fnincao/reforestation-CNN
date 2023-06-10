@@ -21,7 +21,7 @@ directories = ['../../../data/gee_data',
              '../../../data/ai_data/train_images',
              '../../../data/ai_data/val_masks',
              '../../../data/ai_data/train_masks',
-             '../../../data/ai_data/val_masks']
+             '../../../data/ai_data/val_images']
 
 for directory in directories:
     # Iterate over the files in the directory
