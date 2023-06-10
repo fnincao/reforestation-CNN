@@ -7,11 +7,16 @@ from albumentations.pytorch import ToTensorV2
 import random
 
 
-def normalize_image(image):
-    # Convert the image to floating-point values
+def normalize_image(image, sensor:str):
     image = image.astype(np.float32)
-    # Normalize the image to the range [0, 1]
-    image = (image - np.min(image)) / (np.max(image) - np.min(image))
+    if sensor == 'ndvi':
+        image = ((image + 1) / 2)
+    if sensor == 's1':
+        image = np.clip(image, -50, 1)
+        image = ((image + 50) / 51)
+    if sensor == 'palsar':
+        image = np.clip(image, 0, 10000)
+        image = image / 10000
     return image
 
 
@@ -26,7 +31,7 @@ def gen_images(sensor: str, image_dir: str, mask_dir=None, transform=None,):
         for img, mask in zip(img_files, mask_files):
             with rasterio.open(img) as ds:
                 image = np.transpose(ds.read(), (1, 2, 0))
-                norm_img = normalize_image(image)
+                norm_img = normalize_image(image, sensor)
 
             with rasterio.open(mask) as ds:
                 mask = ds.read(1).astype(float)
@@ -74,7 +79,7 @@ def gen_images(sensor: str, image_dir: str, mask_dir=None, transform=None,):
         for img in img_files:
             with rasterio.open(img) as ds:
                 image = np.transpose(ds.read(), (1, 2, 0))
-                norm_img = normalize_image(image)
+                norm_img = normalize_image(image, sensor)
 
             format_transform = A.Compose([
                 A.Resize(height=image.shape[0], width=image.shape[1]),

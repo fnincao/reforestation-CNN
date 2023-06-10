@@ -18,7 +18,7 @@ random.seed(42)
 np.random.seed(42)
 
 # Hyperparameters
-LEARNING_RATE = 1e-6
+LEARNING_RATE = 1e-4
 DEVICE = 'cuda' if torch.cuda.is_available() else 'cpu'
 BATCH_SIZE = 16
 NUM_EPOCHS = 80
