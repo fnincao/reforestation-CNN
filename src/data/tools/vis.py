@@ -10,6 +10,9 @@ import cv2
 
 
 plt.rcParams['figure.dpi'] = 300
+plt.rcParams['font.family'] = 'serif'
+plt.rcParams['font.serif'] = ['Times New Roman'] + plt.rcParams['font.serif']
+
 
 
 def normalize_image(image):
@@ -21,7 +24,7 @@ def normalize_image(image):
 
 
 
-def viz_reference(tile_number: int, save_fig:bool):
+def reference_image(tile_number: int, save_fig:bool):
     '''
     Visualizes a reference imagery tile.
 
@@ -30,7 +33,7 @@ def viz_reference(tile_number: int, save_fig:bool):
     - save_fig (bool): Flag to save the visualization as a PNG image.
 
     Example Usage:
-    viz_reference(tile_number=0, save_fig=True)
+    reference_image(tile_number=0, save_fig=True)
     
     Note:
     - Assumes that the reference files are in GeoTIFF format.
@@ -43,19 +46,19 @@ def viz_reference(tile_number: int, save_fig:bool):
     save_dir = os.path.join(module_dir, '../../../data/figures/')
 
     with rasterio.open(files_ref[tile_number]) as reference:
-        reference_data = reference.read(1).astype(np.uint8)
-        plt.imshow(reference_data, vmin=0, vmax=1, cmap='gray')
+        ref = reference.read(1).astype(np.uint8)
+        plt.imshow(ref, vmin=0, vmax=1, cmap='gray')
         plt.yticks([])
         plt.xticks([])
-        
+
         if save_fig:
             save_path = os.path.join(save_dir, f"{tile_str}.png")
-            plt.imsave(save_path, reference_data, cmap='gray')
-            
+            plt.imsave(save_path, ref, cmap='gray')
+    
         plt.title(tile_str)
 
 
-def viz_planet(tile_number: int, draw_ref: bool, save_fig: bool):
+def planet_image(tile_number: int, draw_ref: bool, save_fig: bool):
     '''
     Visualizes a Planet RGB imagery tile.
     RGB median composite from year 2020.
@@ -66,7 +69,7 @@ def viz_planet(tile_number: int, draw_ref: bool, save_fig: bool):
     - save_fig (bool): Flag to save the visualization as a PNG image.
 
     Example Usage:
-    viz_planet(tile_number=0, draw_ref=True, save_fig=True)
+    planet_image(tile_number=0, draw_ref=True, save_fig=True)
     
     Note:
     - Assumes that the planet and reference files are in GeoTIFF format.
@@ -80,29 +83,29 @@ def viz_planet(tile_number: int, draw_ref: bool, save_fig: bool):
     tile_str = os.path.splitext(os.path.basename(files_planet[tile_number]))[0]
     save_dir = os.path.join(module_dir, '../../../data/figures/')
 
-    with rasterio.open(files_planet[tile_number]) as planet, \
+    with rasterio.open(files_planet[tile_number]) as planet_ds, \
          rasterio.open(files_ref[tile_number]) as reference:
-        image = normalize_image(np.transpose(planet.read(), (1, 2, 0)))
-        gamma = adjust_gamma(image, 0.8)
+        planet = normalize_image(np.transpose(planet_ds.read(), (1, 2, 0)))
+        planet = adjust_gamma(planet, 0.8)
         ref = reference.read(1).astype(np.uint8)
 
         if draw_ref:
             edges = cv2.Canny(ref, threshold1=0, threshold2=1)
             red_mask = np.stack((edges,) * 3, axis=-1)
-            gamma = np.where(red_mask > 0, (1, 0, 0), gamma)
+            planet = np.where(red_mask > 0, (1, 0, 0), planet)
 
-        plt.imshow(gamma)
+        plt.imshow(planet)
         plt.yticks([])
         plt.xticks([])
 
         if save_fig:
             save_path = os.path.join(save_dir, f"{tile_str}.png")
-            plt.imsave(save_path, gamma)
+            plt.imsave(save_path, planet)
 
         plt.title(tile_str)
 
-    
-def viz_ndvi(tile_number: int, draw_ref: bool, save_fig: bool):
+
+def ndvi_image(tile_number: int, draw_ref: bool, save_fig: bool):
     '''
     Visualizes a Planet NDVI imagery tile.
     Red:NDVI 2016. Green:NDVI 2018. Blue: NDVI 2020.
@@ -113,7 +116,7 @@ def viz_ndvi(tile_number: int, draw_ref: bool, save_fig: bool):
     - save_fig (bool): Flag to save the visualization as a PNG image.
 
     Example Usage:
-    viz_ndvi(tile_number=0, draw_ref=True, save_fig=True)
+    ndvi_image(tile_number=0, draw_ref=True, save_fig=True)
     
     Note:
     - Assumes that the Planet NDVI and reference files are in GeoTIFF format.
@@ -127,30 +130,30 @@ def viz_ndvi(tile_number: int, draw_ref: bool, save_fig: bool):
     tile_str = os.path.splitext(os.path.basename(files_ndvi[tile_number]))[0]
     save_dir = os.path.join(module_dir, '../../../data/figures/')
 
-    with rasterio.open(files_ndvi[tile_number]) as ndvi, \
+    with rasterio.open(files_ndvi[tile_number]) as ndvi_ds, \
          rasterio.open(files_ref[tile_number]) as reference:
-        image = np.transpose(ndvi.read(), (1, 2, 0))
-        image = np.clip(((image + 1) / 2), 0.75, 1)
-        gamma = adjust_gamma(image, 7)
+        ndvi = np.transpose(ndvi_ds.read(), (1, 2, 0))
+        ndvi = np.clip(((ndvi + 1) / 2), 0.75, 1)
+        ndvi = adjust_gamma(ndvi, 7)
         ref = reference.read(1).astype(np.uint8)
 
         if draw_ref:
             edges = cv2.Canny(ref, threshold1=0, threshold2=1)
             red_mask = np.stack((edges,) * 3, axis=-1)
-            gamma = np.where(red_mask > 0, (1, 0, 0), gamma)
+            ndvi = np.where(red_mask > 0, (1, 0, 0), ndvi)
 
-        plt.imshow(gamma)
+        plt.imshow(ndvi)
         plt.yticks([])
         plt.xticks([])
 
         if save_fig:
             save_path = os.path.join(save_dir, f"{tile_str}.png")
-            plt.imsave(save_path, gamma)
+            plt.imsave(save_path, ndvi)
 
         plt.title(tile_str)
 
 
-def viz_s1(tile_number: int, draw_ref: bool, save_fig: bool):
+def s1_image(tile_number: int, draw_ref: bool, save_fig: bool):
     '''
     Visualizes a Sentinel-1 Band C VH imagery tile.
     Red: VH 2016. Green: VH 2018. Blue: VH 2020.
@@ -161,13 +164,13 @@ def viz_s1(tile_number: int, draw_ref: bool, save_fig: bool):
     - save_fig (bool): Flag to save the visualization as a PNG image.
 
     Example Usage:
-    viz_s1(tile_number=0, draw_ref=True, save_fig=True)
+    s1_image(tile_number=0, draw_ref=True, save_fig=True)
     
     Note:
     - Assumes that the Sentinel-1 and reference files are in GeoTIFF format.
     - The visualization is saved in '../../../data/figures/'.
     '''
-    
+
     module_dir = os.path.dirname(os.path.abspath(__file__))
     imgs_dir = os.path.join(module_dir, '../../../data/croped_data/')
     files_s1 = sorted(glob.glob(os.path.join(imgs_dir, '*s1.tif')))
@@ -175,30 +178,30 @@ def viz_s1(tile_number: int, draw_ref: bool, save_fig: bool):
     tile_str = os.path.splitext(os.path.basename(files_s1[tile_number]))[0]
     save_dir = os.path.join(module_dir, '../../../data/figures/')
 
-    with rasterio.open(files_s1[tile_number]) as s1, \
+    with rasterio.open(files_s1[tile_number]) as s1_ds, \
          rasterio.open(files_ref[tile_number]) as reference:
-        image = normalize_image(np.transpose(s1.read(), (1, 2, 0)))
-        image = cv2.resize(image, (400, 400))
-        gamma = adjust_gamma(image, 1.2)
+        s1 = normalize_image(np.transpose(s1_ds.read(), (1, 2, 0)))
+        s1 = cv2.resize(s1, (400, 400))
+        s1 = adjust_gamma(s1, 1.2)
         ref = reference.read(1).astype(np.uint8)
 
         if draw_ref:
             edges = cv2.Canny(ref, threshold1=0, threshold2=1)
             red_mask = np.stack((edges,) * 3, axis=-1)
-            gamma = np.where(red_mask > 0, (1, 0, 0), gamma)
+            s1 = np.where(red_mask > 0, (1, 0, 0), s1)
 
-        plt.imshow(gamma)
+        plt.imshow(s1)
         plt.yticks([])
         plt.xticks([])
 
         if save_fig:
             save_path = os.path.join(save_dir, f"{tile_str}.png")
-            plt.imsave(save_path, gamma)
+            plt.imsave(save_path, s1)
 
         plt.title(tile_str)
 
-        
-def viz_palsar(tile_number: int, draw_ref: bool, save_fig: bool):
+
+def palsar_image(tile_number: int, draw_ref: bool, save_fig: bool):
     '''
     Visualizes a ALOS/PALSAR-2 Band L HV imagery tile.
     Red: HV 2016. Green: HV 2018. Blue: HV 2020.
@@ -210,13 +213,13 @@ def viz_palsar(tile_number: int, draw_ref: bool, save_fig: bool):
     - save_fig (bool): Flag to save the visualization as a PNG image.
 
     Example Usage:
-    viz_palsar(tile_number=0, draw_ref=True, save_fig=True)
+    palsar_image(tile_number=0, draw_ref=True, save_fig=True)
     
     Note:
     - Assumes that the palsar and reference files are in GeoTIFF format.
     - The visualization is saved in '../../../data/figures/'.
     '''
-    
+
     module_dir = os.path.dirname(os.path.abspath(__file__))
     imgs_dir = os.path.join(module_dir, '../../../data/croped_data/')
     files_palsar = sorted(glob.glob(os.path.join(imgs_dir, '*palsar.tif')))
@@ -224,95 +227,117 @@ def viz_palsar(tile_number: int, draw_ref: bool, save_fig: bool):
     tile_str = os.path.splitext(os.path.basename(files_palsar[tile_number]))[0]
     save_dir = os.path.join(module_dir, '../../../data/figures/')
 
-    with rasterio.open(files_palsar[tile_number]) as palsar, \
+    with rasterio.open(files_palsar[tile_number]) as palsar_ds, \
          rasterio.open(files_ref[tile_number]) as reference:
-        image = normalize_image(np.transpose(palsar.read(), (1, 2, 0)))
-        image = cv2.resize(image, (400, 400))
-        gamma = adjust_gamma(image, 0.8)
+        palsar = normalize_image(np.transpose(palsar_ds.read(), (1, 2, 0)))
+        palsar = cv2.resize(palsar, (400, 400))
+        palsar = adjust_gamma(palsar, 0.8)
         ref = reference.read(1).astype(np.uint8)
 
         if draw_ref:
             edges = cv2.Canny(ref, threshold1=0, threshold2=1)
             red_mask = np.stack((edges,) * 3, axis=-1)
-            gamma = np.where(red_mask > 0, (1, 0, 0), gamma)
+            palsar = np.where(red_mask > 0, (1, 0, 0), palsar)
 
-        plt.imshow(gamma)
+        plt.imshow(palsar)
         plt.yticks([])
         plt.xticks([])
 
         if save_fig:
             save_path = os.path.join(save_dir, f"{tile_str}.png")
-            plt.imsave(save_path, gamma)
+            plt.imsave(save_path, palsar)
 
         plt.title(tile_str)
 
 
-def viz_all(tile_number: int,  draw_ref: bool, save_fig: bool):
-    current_dir = os.getcwd()
+def all_images(tile_number: int,  draw_ref: bool, save_fig: bool):
+    '''
+    Visualizes all imagery tile.
+    Planet RGB. RGB median composite from year 2020.
+    Planet NDVI. Red:NDVI 2016. Green:NDVI 2018. Blue: NDVI 2020.
+    Sentinel-1 C-Band. Red: VH 2016. Green: VH 2018. Blue: VH 2020.
+    ALOS/PALSAR-2 L-Band. Red: HV 2016. Green: HV 2018. Blue: HV 2020.
+
+    Parameters:
+    - tile_number (int): Index of the tile to visualize.
+    - draw_ref (bool): Flag to draw reference borders on the image.
+    - save_fig (bool): Flag to save the visualization as a PNG image.
+
+    Example Usage:
+    all_images(tile_number=0, draw_ref=True, save_fig=True)
+    
+    Note:
+    - Assumes that the images files are in GeoTIFF format.
+    - The visualization is saved in '../../../data/figures/'.
+    '''
+
     module_dir = os.path.dirname(os.path.abspath(__file__))
-    os.chdir(module_dir)
-    imgs_dir = '../../../data/croped_data/'
-    files_ref = sorted(glob.glob(imgs_dir + '*ref.tif'))
-    files_planet = sorted(glob.glob(imgs_dir + '*planet.tif'))
-    files_s1 = sorted(glob.glob(imgs_dir + '*s1.tif'))
-    files_s2 = sorted(glob.glob(imgs_dir + '*s2.tif'))
-    with rasterio.open(files_ref[tile_number]) as ref_ds,\
+    imgs_dir = os.path.join(module_dir, '../../../data/croped_data/')
+    files_planet = sorted(glob.glob(os.path.join(imgs_dir, '*planet.tif')))
+    files_ndvi = sorted(glob.glob(os.path.join(imgs_dir, '*ndvi.tif')))
+    files_s1 = sorted(glob.glob(os.path.join(imgs_dir, '*s1.tif')))
+    files_palsar = sorted(glob.glob(os.path.join(imgs_dir, '*palsar.tif')))
+    files_ref = sorted(glob.glob(os.path.join(imgs_dir, '*ref.tif')))
+    save_dir = os.path.join(module_dir, '../../../data/figures/')
+
+    with rasterio.open(files_ref[tile_number]) as reference,\
          rasterio.open(files_planet[tile_number]) as planet_ds,\
+         rasterio.open(files_ndvi[tile_number]) as ndvi_ds,\
          rasterio.open(files_s1[tile_number]) as s1_ds,\
-         rasterio.open(files_s2[tile_number]) as s2_ds:
+         rasterio.open(files_palsar[tile_number]) as palsar_ds:
 
-        # Read the raster data
-        ref = ref_ds.read(1).astype(np.uint8)
-        nir_planet = planet_ds.read(1).astype(np.uint16)
-        red_planet = planet_ds.read(2).astype(np.uint16)
-        green_planet = planet_ds.read(3).astype(np.uint16)
-        s1 = s1_ds.read(1)
-        s2_20 = s2_ds.read(1)
-        s2_21 = s2_ds.read(2)
-        s2_22 = s2_ds.read(3)
+        ref = reference.read(1).astype(np.uint8)
 
-        res_s1 = rescale_intensity(s1, in_range=(-30, -1),
-                                   out_range=(0, 255)).astype(np.uint8)
+        planet = normalize_image(np.transpose(planet_ds.read(), (1, 2, 0)))
+        planet = adjust_gamma(planet, 0.8)
 
-        res_nir = rescale_intensity(nir_planet, in_range=(0, 5500),
-                                    out_range=(0, 255)).astype(np.uint8)
-        res_red = rescale_intensity(red_planet, in_range=(0, 4000),
-                                    out_range=(0, 255)).astype(np.uint8)
-        res_green = rescale_intensity(green_planet, in_range=(0, 4000),
-                                      out_range=(0, 255)).astype(np.uint8)
+        ndvi = np.transpose(ndvi_ds.read(), (1, 2, 0))
+        ndvi = np.clip(((ndvi + 1) / 2), 0.75, 1)
+        ndvi = adjust_gamma(ndvi, 7)
 
-        res_s2_20 = rescale_intensity(s2_20, in_range=(0, 4000),
-                                      out_range=(0, 255)).astype(np.uint8)
-        res_s2_21 = rescale_intensity(s2_21, in_range=(0, 4000),
-                                      out_range=(0, 255)).astype(np.uint8)
-        res_s2_22 = rescale_intensity(s2_22, in_range=(0, 4000),
-                                      out_range=(0, 255)).astype(np.uint8)
+        s1 = normalize_image(np.transpose(s1_ds.read(), (1, 2, 0)))
+        s1 = cv2.resize(s1, (400, 400))
+        s1 = adjust_gamma(s1, 1.2)
 
-        rgb = np.stack([res_nir, res_red, res_green], axis=-1)
+        palsar = normalize_image(np.transpose(palsar_ds.read(), (1, 2, 0)))
+        palsar = cv2.resize(palsar, (400, 400))
+        palsar = adjust_gamma(palsar, 0.8)
 
-        fig, axs = plt.subplots(2, 3, figsize=(10, 10))
+        if draw_ref:
+            edges = cv2.Canny(ref, threshold1=0, threshold2=1)
+            red_mask = np.stack((edges,) * 3, axis=-1)
+            planet = np.where(red_mask > 0, (1, 0, 0), planet)
+            ndvi = np.where(red_mask > 0, (1, 0, 0), ndvi)
+            s1 = np.where(red_mask > 0, (1, 0, 0), s1)
+            palsar = np.where(red_mask > 0, (1, 0, 0), palsar)
 
-        fig.suptitle('Tile ' + str(tile_number), y=0.65, size=12)
 
-        # Plot the raster data
-        axs[0, 0].imshow(ref, vmin=0, vmax=1, cmap='gray')
-        axs[0, 0].set_title('Reference (5m)', pad=10)
+        fig, axs = plt.subplots(2, 2, figsize=(6, 6))
 
-        axs[0, 1].imshow(rgb)
-        axs[0, 1].set_title('Planet Scope (5m)', pad=10)
+        fig.suptitle('Tile ' + str(tile_number), size=12)
 
-        axs[0, 2].imshow(res_s1, cmap='gray')
-        axs[0, 2].set_title('Sentinel-1 C-BAND VH (10m)', pad=10)
+        axs[0, 0].imshow(planet)
+        axs[0, 0].set_title('Planet RGB 2020 (5m)', size=9,  pad=10)
+        axs[0, 0].set_yticks([])
+        axs[0, 0].set_xticks([])
 
-        axs[1, 0].imshow(res_s2_20, cmap='gray')
-        axs[1, 0].set_title('Sentinel-2 Band-5 2020 (20m)', pad=10)
+        axs[0, 1].imshow(ndvi)
+        axs[0, 1].set_title('Temporal Planet NDVI (5m)',size=9, pad=10)
+        axs[0, 1].set_yticks([])
+        axs[0, 1].set_xticks([])
 
-        axs[1, 1].imshow(res_s2_21, cmap='gray')
-        axs[1, 1].set_title('Sentinel-2 Band-5 2021 (20m)', pad=10)
+        axs[1, 0].imshow(s1)
+        axs[1, 0].set_title('Temporal Sentinel-1 C-BAND VH (10m)', size=9, pad=10)
+        axs[1, 0].set_yticks([])
+        axs[1, 0].set_xticks([])
 
-        axs[1, 2].imshow(res_s2_22, cmap='gray')
-        axs[1, 2].set_title('Sentinel-2 Band-5 2022 (20m)', pad=10)
+        axs[1, 1].imshow(palsar)
+        axs[1, 1].set_title('Temporal ALOS/PALSAR-2 L-BAND HV (20m)', size=9, pad=10)
+        axs[1, 1].set_yticks([])
+        axs[1, 1].set_xticks([])
 
-        plt.subplots_adjust(bottom=0, top=0.6)
+        plt.tight_layout()
 
-    os.chdir(current_dir)
+        if save_fig:
+            save_path = os.path.join(save_dir, f"tile_{str(tile_number)}_all.png")
+            plt.savefig(save_path, facecolor='white')
