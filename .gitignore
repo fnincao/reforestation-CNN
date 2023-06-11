@@ -149,3 +149,5 @@ src/model_resampling/my_checkpoint.pth.tar
 src/model_fusion/my_checkpoint.pth.tar
 
 
+# wandb
+wandb/
