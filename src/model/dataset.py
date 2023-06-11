@@ -10,30 +10,29 @@ random.seed(42)
 np.random.seed(42)
 
 
-def normalize_image(image):
+def normalize_image(image, sensor:str):
     # Convert the image to floating-point values
     image = image.astype(np.float32)
-    # Normalize the image to the range [0, 1]
-    image = image / 10000
+    if sensor == 'planet':
+        image = image / 10000
+    if sensor == 'ndvi':
+        image = (image + 1) / 2
     return image
 
 
 def stack_images(image_dir: str, mask_dir: str, transform=None):
     images = []
     masks = []
-    img_files = sorted(glob.glob(image_dir + '/*planet.tif'))
+    img_files = sorted(glob.glob(image_dir + '/*ndvi.tif'))
     mask_files = sorted(glob.glob(mask_dir + '/*tif'))
 
     for img, mask in zip(img_files, mask_files):
 
         with rasterio.open(img) as ds:
+            image = np.transpose(ds.read(), (1, 2, 0))
+            image = normalize_image(image, 'ndvi')
 
-            ds_nir = normalize_image(ds.read(1))
-            ds_red = normalize_image(ds.read(2))
-            ds_green = normalize_image(ds.read(3))
-            image = (np.stack([ds_nir, ds_red, ds_green], axis=-1))
-
-        with rasterio.open(mask) as ds:
+        with rasterio.open(mask) as ds'
             mask = ds.read(1).astype(float)
 
         format_transform = A.Compose([

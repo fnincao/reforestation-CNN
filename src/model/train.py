@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 import albumentations as A
+import wandb
 from albumentations.pytorch import ToTensorV2
 from tqdm import tqdm
 from loss_fn import TverskyLoss, DiceLoss # noqa
@@ -11,6 +12,8 @@ from utils import (load_checkpoint, # noqa
                    get_loaders,
                    check_accuracy,
                    save_predictions_as_imgs)
+
+
 
 # Hyperparameters
 LEARNING_RATE = 1e-4
@@ -27,10 +30,22 @@ TRAIN_MASK_DIR = '../../data/ai_data/train_masks'
 VAL_IMG_DIR = '../../data/ai_data/val_images'
 VAL_MASK_DIR = '../../data/ai_data/val_masks'
 
+# start a new wandb run to track this script
+wandb.init(
+    # set the wandb project where this run will be logged
+    project="Reforestation",
+    
+    # track hyperparameters and run metadata
+    config={
+    "learning_rate": LEARNING_RATE,
+    "architecture": "UNET",
+    "epochs": NUM_EPOCHS    }
+)
 
 # One epoch of training
 def train_fn(loader, model, optimizer, loss_fn, scaler):
     loop = tqdm(loader)
+    loss_list = []
 
     for batch_idx, (data, targets) in enumerate(loop):
         data = data.to(device=DEVICE)
@@ -39,7 +54,7 @@ def train_fn(loader, model, optimizer, loss_fn, scaler):
         with torch.cuda.amp.autocast():
             predictions = model(data)
             loss = loss_fn(predictions, targets)
-
+        
         # backward
         optimizer.zero_grad()
         scaler.scale(loss).backward()
@@ -48,6 +63,9 @@ def train_fn(loader, model, optimizer, loss_fn, scaler):
 
         # update tqdm loop
         loop.set_postfix(loss=loss.item())
+        loss_list.append(loss.item())
+    
+    return sum(loss_list) / len(loss_list)
 
 
 def main():
@@ -78,7 +96,7 @@ def main():
     scaler = torch.cuda.amp.GradScaler()
 
     for epoch in range(NUM_EPOCHS):
-        train_fn(train_loader, model, optimizer, loss_fn, scaler)
+        loss = train_fn(train_loader, model, optimizer, loss_fn, scaler)
 
         # save model
         checkpoint = {
@@ -90,13 +108,17 @@ def main():
         save_checkpoint(checkpoint)
 
         # check accuracy
-        check_accuracy(val_loader, model, device=DEVICE)
-
+        acc, dice, pd_acc = check_accuracy(val_loader, model, device=DEVICE)
+        
+        wandb.log({"acc": acc, "mean_loss": loss,
+                   "Dice-score": dice, "Producer's acc":pd_acc })
+        
         # print some examples to a folder
         save_predictions_as_imgs(
             val_loader, model, device=DEVICE
         )
 
-
+        
 if __name__ == '__main__':
     main()
+    wandb.finish()
