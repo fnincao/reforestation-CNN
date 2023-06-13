@@ -23,14 +23,14 @@ def normalize_image(image, sensor:str):
 def stack_images(image_dir: str, mask_dir: str, transform=None):
     images = []
     masks = []
-    img_files = sorted(glob.glob(image_dir + '/*ndvi.tif'))
+    img_files = sorted(glob.glob(image_dir + '/*planet.tif'))
     mask_files = sorted(glob.glob(mask_dir + '/*tif'))
 
     for img, mask in zip(img_files, mask_files):
 
         with rasterio.open(img) as ds:
             image = np.transpose(ds.read(), (1, 2, 0))
-            image = normalize_image(image, 'ndvi')
+            image = normalize_image(image, 'planet')
 
         with rasterio.open(mask) as ds:
             mask = ds.read(1).astype(float)
