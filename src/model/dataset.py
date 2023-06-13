@@ -32,7 +32,7 @@ def stack_images(image_dir: str, mask_dir: str, transform=None):
             image = np.transpose(ds.read(), (1, 2, 0))
             image = normalize_image(image, 'ndvi')
 
-        with rasterio.open(mask) as ds'
+        with rasterio.open(mask) as ds:
             mask = ds.read(1).astype(float)
 
         format_transform = A.Compose([

@@ -90,7 +90,8 @@ def check_accuracy(loader, model, device='cuda'):
         print(f'Dice Score: {dice_score/len(loader)}')
         print(f'Producers accuracy: {true_positives/total_positives}')
         model.train()
-
+    
+    return (num_correct/num_pixels*100), (dice_score/len(loader)), (true_positives/total_positives), 
 
 def save_predictions_as_imgs(
         loader,
