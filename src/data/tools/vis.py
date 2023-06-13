@@ -85,7 +85,7 @@ def planet_image(tile_number: int, draw_ref: bool, save_fig: bool):
 
     with rasterio.open(files_planet[tile_number]) as planet_ds, \
          rasterio.open(files_ref[tile_number]) as reference:
-        planet = normalize_image(np.transpose(planet_ds.read(), (1, 2, 0)))
+        planet = normalize_image(np.transpose(planet_ds.read()[0:3], (1, 2, 0)))
         planet = adjust_gamma(planet, 0.8)
         ref = reference.read(1).astype(np.uint8)
 
@@ -288,7 +288,7 @@ def all_images(tile_number: int,  draw_ref: bool, save_fig: bool):
 
         ref = reference.read(1).astype(np.uint8)
 
-        planet = normalize_image(np.transpose(planet_ds.read(), (1, 2, 0)))
+        planet = normalize_image(np.transpose(planet_ds.read()[0:3], (1, 2, 0)))
         planet = adjust_gamma(planet, 0.8)
 
         ndvi = np.transpose(ndvi_ds.read(), (1, 2, 0))
