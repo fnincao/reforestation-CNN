@@ -23,7 +23,7 @@ class DiceLoss(nn.Module):
 
 
 class TverskyLoss(nn.Module):
-    def __init__(self, alpha=0.2, beta=0.8):
+    def __init__(self, alpha=0.4, beta=0.6):
         super(TverskyLoss, self).__init__()
         self.alpha = alpha
         self.beta = beta
@@ -37,8 +37,8 @@ class TverskyLoss(nn.Module):
         false_negatives = torch.sum((1 - predicted) * target)
 
         tversky_index = true_positives / (true_positives +
-                                          self.alpha * false_positives +
-                                          self.beta * false_negatives)
+                                          (self.alpha * false_positives) +
+                                          (self.beta * false_negatives))
         tversky_loss = 1 - tversky_index
 
         return tversky_loss

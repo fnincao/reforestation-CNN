@@ -13,10 +13,7 @@ np.random.seed(42)
 def normalize_image(image, sensor:str):
     # Convert the image to floating-point values
     image = image.astype(np.float32)
-    if sensor == 'planet':
-        image = image / 10000
-    if sensor == 'ndvi':
-        image = (image + 1) / 2
+    image = image / 10000
     return image
 
 

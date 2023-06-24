@@ -64,7 +64,9 @@ def check_accuracy(loader, model, device='cuda'):
     model.eval()
 
     true_positives = 0
-    total_positives = 0
+    true_negatives = 0
+    false_positives = 0
+    false_negatives = 0
 
     with torch.no_grad():
         for x, y, z, m in loader:
@@ -74,8 +76,11 @@ def check_accuracy(loader, model, device='cuda'):
             m = m.to(device).unsqueeze(1)
             preds = torch.sigmoid(model(x, y, z))
             preds = (preds > 0.5).float()
+            
             true_positives += ((preds == 1) & (m == 1)).sum()
-            total_positives += (m == 1).sum()
+            true_negatives += ((preds == 0) & (m == 0)).sum()
+            false_positives += ((preds == 1) & (m == 0)).sum()
+            false_negatives += ((preds == 0) & (m == 1)).sum()
 
             num_correct += (preds == m).sum()
             num_pixels += torch.numel(preds)
@@ -83,15 +88,19 @@ def check_accuracy(loader, model, device='cuda'):
                 (preds + m).sum() + 1e-8
             )
 
-        print(
-            f'Got {num_correct}/{num_pixels} with acc {num_correct/num_pixels*100}' # noqa
-        )
+        accuracy = num_correct / num_pixels * 100
+        precision = true_positives / (true_positives + false_positives + 1e-8)
+        recall = true_positives / (true_positives + false_negatives + 1e-8)
+        dice_score = dice_score / len(loader)
 
-        print(f'Dice Score: {dice_score/len(loader)}')
-        print(f'Producers accuracy: {true_positives/total_positives}')
+        print(f'Overall Accuracy: {accuracy}')
+        print(f'Precision: {precision}')
+        print(f'Recall: {recall}')
+        print(f'Dice Score: {dice_score}')
         model.train()
-    
-    return (num_correct/num_pixels*100), (dice_score/len(loader)), (true_positives/total_positives), 
+
+    return accuracy, precision, recall, dice_score
+
 
 def save_predictions_as_imgs(
         loader,

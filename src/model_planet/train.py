@@ -38,8 +38,9 @@ wandb.init(
     # track hyperparameters and run metadata
     config={
     "learning_rate": LEARNING_RATE,
-    "architecture": "UNET",
-    "epochs": NUM_EPOCHS    }
+    "architecture": "UNET-PLANET",
+    "epochs": NUM_EPOCHS,
+    "dataset": 'Nordeste'}
 )
 
 # One epoch of training
@@ -108,16 +109,13 @@ def main():
         save_checkpoint(checkpoint)
 
         # check accuracy
-        acc, dice, pd_acc = check_accuracy(val_loader, model, device=DEVICE)
+        accuracy, precision, recall, dice_score = check_accuracy(val_loader,
+                                                                 model,
+                                                                 device=DEVICE)
         
-        wandb.log({"acc": acc, "mean_loss": loss,
-                   "Dice-score": dice, "Producer's acc":pd_acc })
-        
-        # print some examples to a folder
-        save_predictions_as_imgs(
-            val_loader, model, device=DEVICE
-        )
-
+        wandb.log({"accuracy": accuracy, "mean_loss": loss,
+                   "Dice-score": dice_score, "precision":precision,
+                  'recall':recall })
         
 if __name__ == '__main__':
     main()

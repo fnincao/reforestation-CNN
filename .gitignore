@@ -144,8 +144,8 @@ dmypy.json
 /data/figures/*png
 
 # UNET checkpoint file
-src/model/my_checkpoint.pth.tar
-src/model_resampling/my_checkpoint.pth.tar
+src/model_planet/my_checkpoint.pth.tar
+src/model_ndvi/my_checkpoint.pth.tar
 src/model_fusion/my_checkpoint.pth.tar
 
 
