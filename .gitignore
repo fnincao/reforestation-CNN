@@ -151,3 +151,6 @@ src/model_fusion/my_checkpoint.pth.tar
 
 # wandb
 wandb/
+
+# Checkpoints
+Checkpoints/*

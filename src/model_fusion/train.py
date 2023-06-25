@@ -41,7 +41,7 @@ wandb.init(
     # track hyperparameters and run metadata
     config={
     "learning_rate": LEARNING_RATE,
-    "architecture": "UNET-NDVI",
+    "architecture": "UNET-FUSION",
     "epochs": NUM_EPOCHS,
     "dataset": 'Nordeste'}
 )
