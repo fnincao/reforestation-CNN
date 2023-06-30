@@ -84,16 +84,16 @@ def check_accuracy(loader, model, device='cuda'):
                 (preds + y).sum() + 1e-8
             )
 
-        accuracy = num_correct / num_pixels * 100
-        precision = true_positives / (true_positives + false_positives + 1e-8)
-        recall = true_positives / (true_positives + false_negatives + 1e-8)
-        dice_score = dice_score / len(loader)
+    accuracy = num_correct / num_pixels * 100
+    precision = true_positives / (true_positives + false_positives + 1e-8)
+    recall = true_positives / (true_positives + false_negatives + 1e-8)
+    dice_score = dice_score / len(loader)
 
-        print(f'Overall Accuracy: {accuracy}')
-        print(f'Precision: {precision}')
-        print(f'Recall: {recall}')
-        print(f'Dice Score: {dice_score}')
-        model.train()
+    print(f'Overall Accuracy: {accuracy}')
+    print(f'Precision: {precision}')
+    print(f'Recall: {recall}')
+    print(f'Dice Score: {dice_score}')
+    model.train()
 
     return accuracy, precision, recall, dice_score
 

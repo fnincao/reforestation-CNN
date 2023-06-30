@@ -43,7 +43,7 @@ wandb.init(
     "learning_rate": LEARNING_RATE,
     "architecture": "UNET-FUSION",
     "epochs": NUM_EPOCHS,
-    "dataset": 'Nordeste'}
+    "dataset": 'All_polygons'}
 )
 
 

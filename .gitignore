@@ -153,4 +153,8 @@ src/model_fusion/my_checkpoint.pth.tar
 wandb/
 
 # Checkpoints
-Checkpoints/*.pth.tar
+checkpoints/*.pth.tar
+
+# Predictions
+/data/predictions/*png
+/data/predictions/*zip
