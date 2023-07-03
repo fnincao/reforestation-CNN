@@ -158,3 +158,4 @@ checkpoints/*.pth.tar
 # Predictions
 /data/predictions/*png
 /data/predictions/*zip
+/data/predictions/*tif

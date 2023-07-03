@@ -26,6 +26,9 @@ def crop_ref_img(path: str, out_dir: str):
 
     # Open the raster image file
     files = sorted(glob.glob(path + '/*ref.tif'))
+    
+    if len(files) == 0:
+        files = sorted(glob.glob(path + '/*planet.tif'))
 
     for file in files:
         with rasterio.open(file) as src:
@@ -86,6 +89,9 @@ def crop_other_img(sensor: str, to_crop_path: str,
     """ # noqa
 
     ref_files = sorted(glob.glob(ref_path + '/*ref.tif'))
+    
+    if len(ref_files) == 0:
+        ref_files = sorted(glob.glob(ref_path + '/*planet.tif'))
 
     to_crop_files = sorted(glob.glob(to_crop_path + '/*' + sensor + '.tif'))
 

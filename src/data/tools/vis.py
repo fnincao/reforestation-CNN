@@ -58,7 +58,7 @@ def reference_image(tile_number: int, save_fig: bool):
         plt.title(tile_str)
 
 
-def planet_image(tile_number: int, draw_ref: bool, save_fig: bool):
+def planet_image(tile_number: int, save_fig: bool, draw_ref=False):
     '''
     Visualizes a Planet RGB imagery tile.
     RGB median composite from year 2020.
@@ -85,18 +85,19 @@ def planet_image(tile_number: int, draw_ref: bool, save_fig: bool):
     tile_str = os.path.splitext(os.path.basename(files_planet[tile_number]))[0]
     save_dir = os.path.join(module_dir, '../../../data/figures/')
 
-    with rasterio.open(files_planet[tile_number]) as planet_ds, \
-         rasterio.open(files_ref[tile_number]) as reference:
+    with rasterio.open(files_planet[tile_number]) as planet_ds:
 
         planet = np.transpose(planet_ds.read()[0:3], (1, 2, 0))
         planet = normalize_image(planet)
         planet = adjust_gamma(planet, 0.8)
-        ref = reference.read(1).astype(np.uint8)
+        
 
         if draw_ref:
-            edges = cv2.Canny(ref, threshold1=0, threshold2=1)
-            red_mask = np.stack((edges,) * 3, axis=-1)
-            planet = np.where(red_mask > 0, (1, 0, 0), planet)
+            with rasterio.open(files_ref[tile_number]) as reference:
+                ref = reference.read(1).astype(np.uint8)
+                edges = cv2.Canny(ref, threshold1=0, threshold2=1)
+                red_mask = np.stack((edges,) * 3, axis=-1)
+                planet = np.where(red_mask > 0, (1, 0, 0), planet)
 
         plt.imshow(planet)
         plt.yticks([])
@@ -109,7 +110,7 @@ def planet_image(tile_number: int, draw_ref: bool, save_fig: bool):
         plt.title(tile_str)
 
 
-def ndvi_image(tile_number: int, draw_ref: bool, save_fig: bool):
+def ndvi_image(tile_number: int, save_fig: bool, draw_ref=False):
     '''
     Visualizes a Planet NDVI imagery tile.
     Red:NDVI 2016. Green:NDVI 2018. Blue: NDVI 2020.
@@ -136,17 +137,18 @@ def ndvi_image(tile_number: int, draw_ref: bool, save_fig: bool):
     tile_str = os.path.splitext(os.path.basename(files_ndvi[tile_number]))[0]
     save_dir = os.path.join(module_dir, '../../../data/figures/')
 
-    with rasterio.open(files_ndvi[tile_number]) as ndvi_ds, \
-         rasterio.open(files_ref[tile_number]) as reference:
+    with rasterio.open(files_ndvi[tile_number]) as ndvi_ds:
+         
         ndvi = np.transpose(ndvi_ds.read(), (1, 2, 0))
         ndvi = np.clip(((ndvi + 1) / 2), 0.75, 1)
         ndvi = adjust_gamma(ndvi, 7)
-        ref = reference.read(1).astype(np.uint8)
 
         if draw_ref:
-            edges = cv2.Canny(ref, threshold1=0, threshold2=1)
-            red_mask = np.stack((edges,) * 3, axis=-1)
-            ndvi = np.where(red_mask > 0, (1, 0, 0), ndvi)
+            with rasterio.open(files_ref[tile_number]) as reference:
+                ref = reference.read(1).astype(np.uint8)
+                edges = cv2.Canny(ref, threshold1=0, threshold2=1)
+                red_mask = np.stack((edges,) * 3, axis=-1)
+                ndvi = np.where(red_mask > 0, (1, 0, 0), ndvi)
 
         plt.imshow(ndvi)
         plt.yticks([])
@@ -159,7 +161,7 @@ def ndvi_image(tile_number: int, draw_ref: bool, save_fig: bool):
         plt.title(tile_str)
 
 
-def s1_image(tile_number: int, draw_ref: bool, save_fig: bool):
+def s1_image(tile_number: int, save_fig: bool, draw_ref=False):
     '''
     Visualizes a Sentinel-1 Band C VH imagery tile.
     Red: VH 2016. Green: VH 2018. Blue: VH 2020.
@@ -186,17 +188,18 @@ def s1_image(tile_number: int, draw_ref: bool, save_fig: bool):
     tile_str = os.path.splitext(os.path.basename(files_s1[tile_number]))[0]
     save_dir = os.path.join(module_dir, '../../../data/figures/')
 
-    with rasterio.open(files_s1[tile_number]) as s1_ds, \
-         rasterio.open(files_ref[tile_number]) as reference:
+    with rasterio.open(files_s1[tile_number]) as s1_ds:
+         
         s1 = normalize_image(np.transpose(s1_ds.read(), (1, 2, 0)))
         s1 = cv2.resize(s1, (400, 400))
         s1 = adjust_gamma(s1, 1.2)
-        ref = reference.read(1).astype(np.uint8)
 
         if draw_ref:
-            edges = cv2.Canny(ref, threshold1=0, threshold2=1)
-            red_mask = np.stack((edges,) * 3, axis=-1)
-            s1 = np.where(red_mask > 0, (1, 0, 0), s1)
+            with rasterio.open(files_ref[tile_number]) as reference:
+                ref = reference.read(1).astype(np.uint8)
+                edges = cv2.Canny(ref, threshold1=0, threshold2=1)
+                red_mask = np.stack((edges,) * 3, axis=-1)
+                s1 = np.where(red_mask > 0, (1, 0, 0), s1)
 
         plt.imshow(s1)
         plt.yticks([])
@@ -209,7 +212,7 @@ def s1_image(tile_number: int, draw_ref: bool, save_fig: bool):
         plt.title(tile_str)
 
 
-def palsar_image(tile_number: int, draw_ref: bool, save_fig: bool):
+def palsar_image(tile_number: int, save_fig: bool, draw_ref=False):
     '''
     Visualizes a ALOS/PALSAR-2 Band L HV imagery tile.
     Red: HV 2016. Green: HV 2018. Blue: HV 2020.
@@ -237,17 +240,17 @@ def palsar_image(tile_number: int, draw_ref: bool, save_fig: bool):
     tile_str = os.path.splitext(os.path.basename(files_palsar[tile_number]))[0]
     save_dir = os.path.join(module_dir, '../../../data/figures/')
 
-    with rasterio.open(files_palsar[tile_number]) as palsar_ds, \
-         rasterio.open(files_ref[tile_number]) as reference:
+    with rasterio.open(files_palsar[tile_number]) as palsar_ds:
         palsar = normalize_image(np.transpose(palsar_ds.read(), (1, 2, 0)))
         palsar = cv2.resize(palsar, (400, 400))
         palsar = adjust_gamma(palsar, 0.8)
-        ref = reference.read(1).astype(np.uint8)
 
         if draw_ref:
-            edges = cv2.Canny(ref, threshold1=0, threshold2=1)
-            red_mask = np.stack((edges,) * 3, axis=-1)
-            palsar = np.where(red_mask > 0, (1, 0, 0), palsar)
+            with rasterio.open(files_ref[tile_number]) as reference:
+                ref = reference.read(1).astype(np.uint8)
+                edges = cv2.Canny(ref, threshold1=0, threshold2=1)
+                red_mask = np.stack((edges,) * 3, axis=-1)
+                palsar = np.where(red_mask > 0, (1, 0, 0), palsar)
 
         plt.imshow(palsar)
         plt.yticks([])
@@ -260,7 +263,7 @@ def palsar_image(tile_number: int, draw_ref: bool, save_fig: bool):
         plt.title(tile_str)
 
 
-def all_images(tile_number: int,  draw_ref: bool, save_fig: bool):
+def all_images(tile_number: int, save_fig: bool, draw_ref=False):
     '''
     Visualizes all imagery tile.
     Planet RGB. RGB median composite from year 2020.
@@ -292,13 +295,10 @@ def all_images(tile_number: int,  draw_ref: bool, save_fig: bool):
     files_ref = sorted(glob.glob(os.path.join(imgs_dir, '*ref.tif')))
     save_dir = os.path.join(module_dir, '../../../data/figures/')
 
-    with rasterio.open(files_ref[tile_number]) as reference,\
-         rasterio.open(files_planet[tile_number]) as planet_ds,\
+    with rasterio.open(files_planet[tile_number]) as planet_ds,\
          rasterio.open(files_ndvi[tile_number]) as ndvi_ds,\
          rasterio.open(files_s1[tile_number]) as s1_ds,\
          rasterio.open(files_palsar[tile_number]) as palsar_ds:
-
-        ref = reference.read(1).astype(np.uint8)
 
         planet = np.transpose(planet_ds.read()[0:3], (1, 2, 0))
         planet = normalize_image(planet)
@@ -317,12 +317,14 @@ def all_images(tile_number: int,  draw_ref: bool, save_fig: bool):
         palsar = adjust_gamma(palsar, 0.8)
 
         if draw_ref:
-            edges = cv2.Canny(ref, threshold1=0, threshold2=1)
-            red_mask = np.stack((edges,) * 3, axis=-1)
-            planet = np.where(red_mask > 0, (1, 0, 0), planet)
-            ndvi = np.where(red_mask > 0, (1, 0, 0), ndvi)
-            s1 = np.where(red_mask > 0, (1, 0, 0), s1)
-            palsar = np.where(red_mask > 0, (1, 0, 0), palsar)
+            with rasterio.open(files_ref[tile_number]) as reference:
+                ref = reference.read(1).astype(np.uint8)
+                edges = cv2.Canny(ref, threshold1=0, threshold2=1)
+                red_mask = np.stack((edges,) * 3, axis=-1)
+                planet = np.where(red_mask > 0, (1, 0, 0), planet)
+                ndvi = np.where(red_mask > 0, (1, 0, 0), ndvi)
+                s1 = np.where(red_mask > 0, (1, 0, 0), s1)
+                palsar = np.where(red_mask > 0, (1, 0, 0), palsar)
 
         fig, axs = plt.subplots(2, 2, figsize=(6, 6))
 
