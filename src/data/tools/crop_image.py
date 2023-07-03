@@ -10,20 +10,21 @@ from rasterio.windows import from_bounds
 
 def crop_ref_img(path: str, out_dir: str):
     """
-    This function crops the reference raster to a size of
-    400x400 pixels by utilizing the central pixel as a reference
-    point. The resulting cropped raster is then saved in the 
+    Crop the reference raster to a size of 400x400 pixels by
+    utilizing the central pixel as a reference point.
+    The resulting cropped raster is then saved in the
     specified output directory.
 
     Parameters:
     - path (str): The file path to the reference raster.
+
     - out_dir (str): The output directory where the cropped raster will be saved.
 
-    Returns:
-    - None
-    """
-    # Open the raster image file
+    Example Usage:
+    crop_ref_img(path='path/to/reference/raster.tif', out_dir='output/directory')
+    """ # noqa
 
+    # Open the raster image file
     files = sorted(glob.glob(path + '/*ref.tif'))
 
     for file in files:
@@ -68,13 +69,24 @@ def crop_ref_img(path: str, out_dir: str):
 
 def crop_other_img(sensor: str, to_crop_path: str,
                    out_dir: str, ref_path: str):
-    '''
-    Function to crop all the other raster to the right size for
-    U-NET. The raster will be croped based on the spatial extent
-    of the reference raster.
-    '''
+    """
+    Crop other rasters to match the spatial extent of the reference raster for the given sensor.
+    The resulting cropped rasters are saved in the specified output directory.
+
+    Parameters:
+    - sensor (str): The sensor name for the other rasters.
+    - to_crop_path (str): The path to the rasters to be cropped.
+    - out_dir (str): The output directory where the cropped rasters will be saved.
+    - ref_path (str): The path to the reference rasters.
+
+    Example Usage:
+    crop_other_img(sensor='planet', to_crop_path='path/to/rasters',
+                   out_dir='output/directory',
+                   ref_path='path/to/reference/rasters')
+    """ # noqa
+
     ref_files = sorted(glob.glob(ref_path + '/*ref.tif'))
-    
+
     to_crop_files = sorted(glob.glob(to_crop_path + '/*' + sensor + '.tif'))
 
     for ref_file, to_crop_file in zip(ref_files, to_crop_files):

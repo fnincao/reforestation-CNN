@@ -1,4 +1,4 @@
-""" Module to rasterize the reference polygons. """
+"""Module to rasterize the reference polygons."""
 
 import rasterio as rio
 from rasterio.features import rasterize
@@ -11,16 +11,23 @@ def rasterize_polygon(path_file: str, pixel_res: int,
                       out_dir: str, burn_value=1):
     """
     Function to rasterize polygons to start the pre-processing for ingesting
-    in the CNN. The polygon format MUST be in a projected coordinate system.
-    Pixel resolution must be provided in meters. Burn value is the number that
-    will be assign to the pixels inside the polygons, default = 1.
-    """
+    in the CNN.
+
+    Parameters:
+    - path_file (str): The file path to the input shapefile containing the polygons.
+    - pixel_res (int): The pixel resolution in meters.
+    - out_dir (str): The output directory to save the rasterized polygons.
+    - burn_value (int): The value assigned to the pixels inside the polygons. Default is 1.
+
+    Example Usage:
+    rasterize_polygon('path/to/polygons.shp', 5, 'output_directory', burn_value=1)
+    """ # noqa
     shp = gpd.read_file(path_file)
 
     # Check the proj, everything must be in metric scale
     if shp.crs.is_geographic:
-        warnings.warn("This shapefile is not in metrics scale, \
-                      please reproject it to continue")
+        warnings.warn("This shapefile is not in metric scale,\
+                       please reproject it to continue")
         raise Exception()
 
     shp_bounds = shp.total_bounds
@@ -42,6 +49,7 @@ def rasterize_polygon(path_file: str, pixel_res: int,
         nodata=0,
     )
 
+    # Rasterize geometries
     rasterize_geom = [(geom, burn_value) for geom in shp.geometry]
 
     raster_image = rasterize(

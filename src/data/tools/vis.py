@@ -3,7 +3,7 @@
 import rasterio
 import numpy as np
 import matplotlib.pyplot as plt
-from skimage.exposure import rescale_intensity, adjust_gamma
+from skimage.exposure import adjust_gamma
 import glob
 import os
 import cv2
@@ -14,7 +14,6 @@ plt.rcParams['font.family'] = 'serif'
 plt.rcParams['font.serif'] = ['Times New Roman'] + plt.rcParams['font.serif']
 
 
-
 def normalize_image(image):
     # Convert the image to floating-point values
     image = image.astype(np.float32)
@@ -23,8 +22,7 @@ def normalize_image(image):
     return image
 
 
-
-def reference_image(tile_number: int, save_fig:bool):
+def reference_image(tile_number: int, save_fig: bool):
     '''
     Visualizes a reference imagery tile.
 
@@ -34,10 +32,12 @@ def reference_image(tile_number: int, save_fig:bool):
 
     Example Usage:
     reference_image(tile_number=0, save_fig=True)
-    
+
     Note:
     - Assumes that the reference files are in GeoTIFF format.
-    - The visualization is saved in '../../../data/figures/'.
+
+    Example Usage:
+    reference_image(tile_number=0, save_fig=True)
     '''
     module_dir = os.path.dirname(os.path.abspath(__file__))
     imgs_dir = os.path.join(module_dir, '../../../data/croped_data/')
@@ -54,7 +54,7 @@ def reference_image(tile_number: int, save_fig:bool):
         if save_fig:
             save_path = os.path.join(save_dir, f"{tile_str}.png")
             plt.imsave(save_path, ref, cmap='gray')
-    
+
         plt.title(tile_str)
 
 
@@ -70,10 +70,12 @@ def planet_image(tile_number: int, draw_ref: bool, save_fig: bool):
 
     Example Usage:
     planet_image(tile_number=0, draw_ref=True, save_fig=True)
-    
+
     Note:
     - Assumes that the planet and reference files are in GeoTIFF format.
-    - The visualization is saved in '../../../data/figures/'.
+
+    Example Usage:
+    planet_image(tile_number=0, draw_ref=True, save_fig=True)
     '''
 
     module_dir = os.path.dirname(os.path.abspath(__file__))
@@ -85,7 +87,9 @@ def planet_image(tile_number: int, draw_ref: bool, save_fig: bool):
 
     with rasterio.open(files_planet[tile_number]) as planet_ds, \
          rasterio.open(files_ref[tile_number]) as reference:
-        planet = normalize_image(np.transpose(planet_ds.read()[0:3], (1, 2, 0)))
+
+        planet = np.transpose(planet_ds.read()[0:3], (1, 2, 0))
+        planet = normalize_image(planet)
         planet = adjust_gamma(planet, 0.8)
         ref = reference.read(1).astype(np.uint8)
 
@@ -117,10 +121,12 @@ def ndvi_image(tile_number: int, draw_ref: bool, save_fig: bool):
 
     Example Usage:
     ndvi_image(tile_number=0, draw_ref=True, save_fig=True)
-    
+
     Note:
     - Assumes that the Planet NDVI and reference files are in GeoTIFF format.
-    - The visualization is saved in '../../../data/figures/'.
+
+    Example Usage:
+    ndvi_image(tile_number=0, draw_ref=True, save_fig=True)
     '''
 
     module_dir = os.path.dirname(os.path.abspath(__file__))
@@ -165,10 +171,12 @@ def s1_image(tile_number: int, draw_ref: bool, save_fig: bool):
 
     Example Usage:
     s1_image(tile_number=0, draw_ref=True, save_fig=True)
-    
+
     Note:
     - Assumes that the Sentinel-1 and reference files are in GeoTIFF format.
-    - The visualization is saved in '../../../data/figures/'.
+
+    Example Usage:
+    s1_image(tile_number=0, draw_ref=True, save_fig=True)
     '''
 
     module_dir = os.path.dirname(os.path.abspath(__file__))
@@ -214,10 +222,12 @@ def palsar_image(tile_number: int, draw_ref: bool, save_fig: bool):
 
     Example Usage:
     palsar_image(tile_number=0, draw_ref=True, save_fig=True)
-    
+
     Note:
     - Assumes that the palsar and reference files are in GeoTIFF format.
-    - The visualization is saved in '../../../data/figures/'.
+
+    Example Usage:
+    palsar_image(tile_number=0, draw_ref=True, save_fig=True)
     '''
 
     module_dir = os.path.dirname(os.path.abspath(__file__))
@@ -265,10 +275,12 @@ def all_images(tile_number: int,  draw_ref: bool, save_fig: bool):
 
     Example Usage:
     all_images(tile_number=0, draw_ref=True, save_fig=True)
-    
+
     Note:
     - Assumes that the images files are in GeoTIFF format.
-    - The visualization is saved in '../../../data/figures/'.
+
+    Example Usage:
+    all_images(tile_number=0, draw_ref=True, save_fig=True)
     '''
 
     module_dir = os.path.dirname(os.path.abspath(__file__))
@@ -288,7 +300,8 @@ def all_images(tile_number: int,  draw_ref: bool, save_fig: bool):
 
         ref = reference.read(1).astype(np.uint8)
 
-        planet = normalize_image(np.transpose(planet_ds.read()[0:3], (1, 2, 0)))
+        planet = np.transpose(planet_ds.read()[0:3], (1, 2, 0))
+        planet = normalize_image(planet)
         planet = adjust_gamma(planet, 0.8)
 
         ndvi = np.transpose(ndvi_ds.read(), (1, 2, 0))
@@ -311,7 +324,6 @@ def all_images(tile_number: int,  draw_ref: bool, save_fig: bool):
             s1 = np.where(red_mask > 0, (1, 0, 0), s1)
             palsar = np.where(red_mask > 0, (1, 0, 0), palsar)
 
-
         fig, axs = plt.subplots(2, 2, figsize=(6, 6))
 
         fig.suptitle('Tile ' + str(tile_number), size=12)
@@ -322,22 +334,23 @@ def all_images(tile_number: int,  draw_ref: bool, save_fig: bool):
         axs[0, 0].set_xticks([])
 
         axs[0, 1].imshow(ndvi)
-        axs[0, 1].set_title('Temporal Planet NDVI (5m)',size=9, pad=10)
+        axs[0, 1].set_title('Temporal Planet NDVI (5m)', size=9, pad=10)
         axs[0, 1].set_yticks([])
         axs[0, 1].set_xticks([])
 
         axs[1, 0].imshow(s1)
-        axs[1, 0].set_title('Temporal Sentinel-1 C-BAND VH (10m)', size=9, pad=10)
+        axs[1, 0].set_title('Temporal Sentinel-1 C-BAND VH (10m)', size=9, pad=10) # noqa
         axs[1, 0].set_yticks([])
         axs[1, 0].set_xticks([])
 
         axs[1, 1].imshow(palsar)
-        axs[1, 1].set_title('Temporal ALOS/PALSAR-2 L-BAND HV (20m)', size=9, pad=10)
+        axs[1, 1].set_title('Temporal ALOS/PALSAR-2 L-BAND HV (20m)', size=9, pad=10) # noqa
         axs[1, 1].set_yticks([])
         axs[1, 1].set_xticks([])
 
         plt.tight_layout()
 
         if save_fig:
-            save_path = os.path.join(save_dir, f"tile_{str(tile_number)}_all.png")
+            save_string = f"tile_{str(tile_number)}_all.png"
+            save_path = os.path.join(save_dir, save_string)
             plt.savefig(save_path, facecolor='white')
