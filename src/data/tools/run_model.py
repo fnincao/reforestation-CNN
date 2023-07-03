@@ -1,9 +1,7 @@
 from src.model_fusion.model import UNET as unet_fusion
 from src.model_ndvi.model import UNET as unet_ndvi
 from src.model_planet.model import UNET as unet_planet
-from src.model_fusion.dataset import RSDataset as ds_fusion
-from src.model_planet.dataset import PlanetDataset as ds_planet
-from src.model_ndvi.dataset import PlanetDataset as ds_ndvi
+from src.data.tools.rs_dataset import RSDataset
 from torch.utils.data import DataLoader
 from skimage.exposure import rescale_intensity, adjust_gamma
 import cv2
@@ -21,9 +19,7 @@ DEVICE = 'cuda' if torch.cuda.is_available() else 'cpu'
 BATCH_SIZE = 16
 NUM_WORKERS = 2
 PIN_MEMORY = True
-LOAD_MODEL = False
-IMG_DIR = '../data/ai_data/val_images'
-MASK_DIR = '../data/ai_data/val_masks'
+IMG_DIR = '../data/croped_data'
 SAVE_DIR = '../data/predictions/'
 CHECKPOINT_DIR = '../checkpoints/'
 
@@ -36,31 +32,25 @@ def normalize_image(image):
 
 
 def segment_images(model_name:str, roi:int,
-                  img_dir=IMG_DIR, mask_dir=MASK_DIR):
+                  img_dir=IMG_DIR):
     
     if model_name == 'fusion':
-        ds = ds_fusion(image_dir=img_dir,
-                       mask_dir=mask_dir,
-                       transform=None)
+        ds = RSDataset(img_dir, model=model_name,
+                       ndvi=True, s1=True, palsar=True)
         model = unet_fusion(in_channels=3, out_channels=1).to(DEVICE) 
         if roi == 1:
             weights = CHECKPOINT_DIR + 'fusion.pth.tar'
         if roi == 2:
             weights = CHECKPOINT_DIR + 'fusion_ne.pth.tar'
     if model_name == 'ndvi':
-        ds = ds_ndvi(image_dir=img_dir,
-                     mask_dir=mask_dir,
-                     transform=None)
-        channels = 3
+        ds = RSDataset(img_dir, model=model_name, ndvi=True)
         model = unet_ndvi(in_channels=3, out_channels=1).to(DEVICE) 
         if roi == 1:
             weights = CHECKPOINT_DIR + 'ndvi.pth.tar'
         if roi == 2:
             weights = CHECKPOINT_DIR + 'ndvi_ne.pth.tar'
     if model_name == 'rgbn':
-        ds = ds_planet(image_dir=img_dir,
-                       mask_dir=mask_dir,
-                       transform=None)
+        ds = RSDataset(img_dir, model=model_name, planet=True)
         model = unet_planet(in_channels=4, out_channels=1).to(DEVICE) 
         if roi == 1:
             weights = CHECKPOINT_DIR + 'planet.pth.tar'
@@ -81,11 +71,10 @@ def segment_images(model_name:str, roi:int,
     
     if model_name == 'fusion':
         with torch.no_grad():
-            for x, y, z, m in loader:
+            for x, y, z in loader:
                 x = x.to(DEVICE)
                 y = y.to(DEVICE)
                 z = z.to(DEVICE)
-                m = m.to(DEVICE).unsqueeze(1)
                 preds = torch.sigmoid(model(x, y, z))
                 preds = (preds > 0.5).float()
                 numpy_array = preds.squeeze(dim=1).to('cpu').numpy()
@@ -93,9 +82,8 @@ def segment_images(model_name:str, roi:int,
     else:
     
         with torch.no_grad():
-            for x, y in loader:
+            for x in loader:
                 x = x.to(DEVICE)
-                y = y.to(DEVICE).unsqueeze(1)
                 preds = torch.sigmoid(model(x))
                 preds = (preds > 0.5).float()
                 numpy_array = preds.squeeze(dim=1).to('cpu').numpy()
@@ -106,8 +94,8 @@ def segment_images(model_name:str, roi:int,
     return all_predictions
 
     
-def vis_predictions(preds_fusion:None, preds_ndvi:None, preds_rgbn:None,
-                    roi: int, img_dir=IMG_DIR, mask_dir=MASK_DIR ):
+def rgb_predictions(preds_fusion:None, preds_ndvi:None, preds_rgbn:None,
+                    roi: int, img_dir=IMG_DIR):
     
     images = []
     files_planet = sorted(glob.glob(img_dir + '/*planet.tif'))
@@ -116,13 +104,6 @@ def vis_predictions(preds_fusion:None, preds_ndvi:None, preds_rgbn:None,
             planet = normalize_image(np.transpose(planet_ds.read()[0:3], (1, 2, 0)))
             planet = adjust_gamma(planet, 0.8)
             images.append(planet)
-    
-    gd_truth = []
-    files_ref = sorted(glob.glob(mask_dir + '/*ref.tif'))
-    for tile_number in range(len(files_ref)):
-        with rasterio.open(files_ref[tile_number]) as ref_ds:
-            ref = ref_ds.read(1).astype(np.uint8)
-            gd_truth.append(ref)
 
     for idx in range(len(images)):
         image_planet = images[idx]
@@ -141,35 +122,50 @@ def vis_predictions(preds_fusion:None, preds_ndvi:None, preds_rgbn:None,
         edges_rgbn = cv2.Canny(seg_rgbn, threshold1=0, threshold2=1)
         red_mask_rgbn = np.stack((edges_rgbn,) * 3, axis=-1)
         image_rgbn = np.where(red_mask_rgbn > 0, (1, 0, 0), image_planet)
-        
-        reference = gd_truth[idx]
-        edges_ref = cv2.Canny(reference, threshold1=0, threshold2=1)
-        red_mask_ref = np.stack((edges_ref,) * 3, axis=-1)
-        image_ref = np.where(red_mask_ref > 0, (1, 0, 0), image_planet)
 
-        fig, axs = plt.subplots(1, 4, figsize=(16, 16))
-        axs[0].imshow(image_ref)
-        axs[0].set_title(f'Ground Truth')
+        fig, axs = plt.subplots(1, 3, figsize=(16, 16))
+
+        axs[0].imshow(image_rgbn)
+        axs[0].set_title('Prediction UNET RGBN')
         axs[0].set_xticks([])
         axs[0].set_yticks([])
 
-        axs[1].imshow(image_rgbn)
-        axs[1].set_title('Prediction UNET RGBN')
+        axs[1].imshow(image_ndvi)
+        axs[1].set_title('Prediction UNET NDVI')
         axs[1].set_xticks([])
         axs[1].set_yticks([])
 
-        axs[2].imshow(image_ndvi)
-        axs[2].set_title('Prediction UNET NDVI')
+        axs[2].imshow(image_fusion)
+        axs[2].set_title('Prediction UNET Fusion')
         axs[2].set_xticks([])
         axs[2].set_yticks([])
 
-        axs[3].imshow(image_fusion)
-        axs[3].set_title('Prediction UNET Fusion')
-        axs[3].set_xticks([])
-        axs[3].set_yticks([])
-
         tile_number = files_planet[idx].split('_')[-2]
-        tile_string = f"tile_{tile_number}_{str(roi)}_preds.png"
+        tile_string = f"tile_{tile_number}_roi{str(roi)}_preds_rgb.png"
         save_path = os.path.join(SAVE_DIR, tile_string)
         plt.savefig(save_path, facecolor='white', dpi=300, bbox_inches='tight')
         plt.close()
+
+def save_geotiff(pred:np.ndarray, model:str, roi:int, img_dir=IMG_DIR):
+
+    files_planet = sorted(glob.glob(img_dir + '/*planet.tif'))
+    
+    for idx, file in enumerate(files_planet):
+        # Open the reference raster
+        with rasterio.open(file) as ref_raster:
+            # Get the metadata from the reference raster
+            meta = ref_raster.meta.copy()
+
+            # Update the metadata with the necessary details for the output GeoTIFF
+            meta.update(
+                driver='GTiff',
+                dtype='float32',
+                count=1,  # Number of bands in the output GeoTIFF (1 for grayscale)
+                nodata=None  # Set this to a specific value if applicable, otherwise None
+            )
+            tile_number = files_planet[idx].split('_')[-2]
+            tile_string = f"tile_{tile_number}_roi{str(roi)}_pred.tif"
+            output_path = SAVE_DIR + tile_string
+            # Save the array as a GeoTIFF file
+            with rasterio.open(output_path, 'w', **meta) as dst:
+                dst.write(pred[idx], 1)  # Write the array to the first band of the output GeoTIFF
