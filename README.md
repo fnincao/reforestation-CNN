@@ -7,8 +7,10 @@
 <h1 align="center">Leveraging U-NET to map Brazilian Atlantic Forest’s Active Restoration using Remote Sensing data</h1>
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.8111751.svg)](https://doi.org/10.5281/zenodo.8111751)
 
-Cambridge University A14ER CDT MRes project by Felipe Begliomini
+
+University of Cambridge A14ER CDT MRes project by Felipe Begliomini
 
 ## Project Description
 
