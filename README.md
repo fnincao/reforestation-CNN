@@ -10,7 +10,7 @@
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.8111751.svg)](https://doi.org/10.5281/zenodo.8111751)
 
 
-Cambridge University A14ER CDT MRes project by Felipe Begliomini
+University of Cambridge A14ER CDT MRes project by Felipe Begliomini
 
 ## Project Description
 
